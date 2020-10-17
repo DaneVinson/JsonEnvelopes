@@ -1,0 +1,53 @@
+trigger:
+- master
+
+variables:
+  buildConfiguration: 'Release'
+  framework: 'netcoreapp3.1'
+  artifactName: 'JsonEnvelopes'
+
+stages:
+  - stage: Build_Test_Publish
+    displayName: Build, Test and Publish
+
+    jobs:
+      - job: Build
+        displayName: Build
+        pool:
+            vmImage: 'windows-latest'
+
+        steps:
+        - task: PowerShell@2
+          displayName: Assign App Version
+          inputs:
+            targetType: 'inline'
+            script: '$commitId = "$(build.SourceVersion)";
+              $shortId = "v" + $commitId.Substring(0, 8);
+              Write-Host "Commit ID: ${commitId}, Short ID: ${shortId}";
+              Write-Host "##vso[task.setvariable variable=appVersion]$shortId";'
+
+        - task: UseDotNet@2
+          displayName: Install .NET Core SDK
+          inputs:
+            packageType: 'sdk'
+            version: 3.x
+
+        - task: DotNetCoreCLI@2
+          displayName: Restore
+          inputs:
+            command: restore
+            projects: '**/*.csproj'
+
+        - task: DotNetCoreCLI@2
+          displayName: Build
+          inputs:
+            command: build
+            projects: '**/*.csproj'
+            arguments: --configuration $(buildConfiguration) --version-suffix $(appVersion)
+
+        - task: DotNetCoreCLI@2
+          displayName: Test
+          inputs:
+            command: test
+            projects: 'JsonEnvelopes/JsonEnvelopes.Tests.csproj'
+            arguments: '--configuration $(buildConfiguration) --no-restore --no-build -- xunit.parallelizeAssembly=true xunit.parallelizeTestCollections=true'
