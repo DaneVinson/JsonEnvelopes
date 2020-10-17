@@ -5,6 +5,9 @@ variables:
   buildConfiguration: 'Release'
   framework: 'netcoreapp3.1'
   artifactName: 'JsonEnvelopes'
+  major: '0'
+  minor: '5'
+  patch: '0'
 
 stages:
   - stage: Build_Test_Publish
@@ -17,15 +20,6 @@ stages:
             vmImage: 'windows-latest'
 
         steps:
-        - task: PowerShell@2
-          displayName: Assign App Version
-          inputs:
-            targetType: 'inline'
-            script: '$commitId = "$(build.SourceVersion)";
-              $shortId = "v" + $commitId.Substring(0, 8);
-              Write-Host "Commit ID: ${commitId}, Short ID: ${shortId}";
-              Write-Host "##vso[task.setvariable variable=appVersion]$shortId";'
-
         - task: UseDotNet@2
           displayName: Install .NET Core SDK
           inputs:
@@ -43,7 +37,7 @@ stages:
           inputs:
             command: build
             projects: '**/*.csproj'
-            arguments: --configuration $(buildConfiguration) --version-suffix $(appVersion)
+            arguments: --configuration $(buildConfiguration)
 
         - task: DotNetCoreCLI@2
           displayName: Test
@@ -51,3 +45,25 @@ stages:
             command: test
             projects: 'JsonEnvelopes/JsonEnvelopes.Tests.csproj'
             arguments: '--configuration $(buildConfiguration) --no-restore --no-build -- xunit.parallelizeAssembly=true xunit.parallelizeTestCollections=true'
+
+        - task: NuGetCommand@2
+          inputs:
+            command: pack
+            packagesToPack: 'JsonEnvelopes/JsonEnvelopes.csproj'
+            versioningScheme: byBuildNumber
+            majorVersion: '$(major)'
+            minorVersion: '$(minor)'
+            patchVersion: '$(patch)'
+
+        - task: NuGetAuthenticate@0
+          displayName: 'NuGet authenticate'
+          inputs:
+            nuGetServiceConnections: 'NuGet'
+
+        - task: NuGetCommand@2
+          displayName: 'NuGet push'
+          inputs:
+            command: push
+            allowPackageConflicts: true
+            nuGetFeedType: external
+            versioningScheme: byBuildNumber
