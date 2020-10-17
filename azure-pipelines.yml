@@ -8,6 +8,7 @@ variables:
   major: '0'
   minor: '5'
   patch: '0'
+  version: '0.5.0'
 
 jobs:
   - job: Build_Test_Publish
@@ -47,21 +48,19 @@ jobs:
       inputs:
         command: pack
         packagesToPack: 'JsonEnvelopes/JsonEnvelopes.csproj'
-        versioningScheme: byBuildNumber
-        majorVersion: '$(major)'
-        minorVersion: '$(minor)'
-        patchVersion: '$(patch)'
-
-    - task: NuGetAuthenticate@0
-      displayName: 'NuGet authenticate'
-      inputs:
-        nuGetServiceConnections: 'NuGet'
-
-    - task: NuGetCommand@2
-      displayName: 'NuGet push'
-      inputs:
-        command: push
-        allowPackageConflicts: true
-        nuGetFeedType: external
         versioningScheme: byEnvVar
-        versionEnvVar: '$(version)'      
+        versionEnvVar: '$(version)'
+
+    # - task: NuGetAuthenticate@0
+    #   displayName: 'NuGet authenticate'
+    #   inputs:
+    #     nuGetServiceConnections: 'NuGet'
+
+    # - task: NuGetCommand@2
+    #   displayName: 'NuGet push'
+    #   inputs:
+    #     command: push
+    #     allowPackageConflicts: true
+    #     nuGetFeedType: external
+    #     versioningScheme: byEnvVar
+    #     versionEnvVar: '$(version)'
