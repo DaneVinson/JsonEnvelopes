@@ -43,10 +43,11 @@ stages:
           displayName: Test
           inputs:
             command: test
-            projects: 'JsonEnvelopes/JsonEnvelopes.Tests.csproj'
+            projects: '**/*.csproj'
             arguments: '--configuration $(buildConfiguration) --no-restore --no-build -- xunit.parallelizeAssembly=true xunit.parallelizeTestCollections=true'
 
         - task: NuGetCommand@2
+          displayName: 'NuGet pack'
           inputs:
             command: pack
             packagesToPack: 'JsonEnvelopes/JsonEnvelopes.csproj'
