@@ -9,62 +9,59 @@ variables:
   minor: '5'
   patch: '0'
 
-stages:
-  - stage: Build_Test_Publish
-    displayName: Build, Test and Publish
+jobs:
+  - job: Build_Test_Publish
+    displayName: 'Build, test and publish to Nuget'
+    pool:
+        vmImage: 'windows-latest'
 
-    jobs:
-      - job: Build
-        displayName: Build
-        pool:
-            vmImage: 'windows-latest'
+    steps:
+    - task: UseDotNet@2
+      displayName: Install .NET Core SDK
+      inputs:
+        packageType: 'sdk'
+        version: 3.x
 
-        steps:
-        - task: UseDotNet@2
-          displayName: Install .NET Core SDK
-          inputs:
-            packageType: 'sdk'
-            version: 3.x
+    - task: DotNetCoreCLI@2
+      displayName: Restore
+      inputs:
+        command: restore
+        projects: '**/*.csproj'
 
-        - task: DotNetCoreCLI@2
-          displayName: Restore
-          inputs:
-            command: restore
-            projects: '**/*.csproj'
+    - task: DotNetCoreCLI@2
+      displayName: Build
+      inputs:
+        command: build
+        projects: '**/*.csproj'
+        arguments: --configuration $(buildConfiguration)
 
-        - task: DotNetCoreCLI@2
-          displayName: Build
-          inputs:
-            command: build
-            projects: '**/*.csproj'
-            arguments: --configuration $(buildConfiguration)
+    - task: DotNetCoreCLI@2
+      displayName: Test
+      inputs:
+        command: test
+        projects: '**/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --no-restore --no-build -- xunit.parallelizeAssembly=true xunit.parallelizeTestCollections=true'
 
-        - task: DotNetCoreCLI@2
-          displayName: Test
-          inputs:
-            command: test
-            projects: '**/*.csproj'
-            arguments: '--configuration $(buildConfiguration) --no-restore --no-build -- xunit.parallelizeAssembly=true xunit.parallelizeTestCollections=true'
+    - task: NuGetCommand@2
+      displayName: 'NuGet pack'
+      inputs:
+        command: pack
+        packagesToPack: 'JsonEnvelopes/JsonEnvelopes.csproj'
+        versioningScheme: byBuildNumber
+        majorVersion: '$(major)'
+        minorVersion: '$(minor)'
+        patchVersion: '$(patch)'
 
-        - task: NuGetCommand@2
-          displayName: 'NuGet pack'
-          inputs:
-            command: pack
-            packagesToPack: 'JsonEnvelopes/JsonEnvelopes.csproj'
-            versioningScheme: byBuildNumber
-            majorVersion: '$(major)'
-            minorVersion: '$(minor)'
-            patchVersion: '$(patch)'
+    - task: NuGetAuthenticate@0
+      displayName: 'NuGet authenticate'
+      inputs:
+        nuGetServiceConnections: 'NuGet'
 
-        - task: NuGetAuthenticate@0
-          displayName: 'NuGet authenticate'
-          inputs:
-            nuGetServiceConnections: 'NuGet'
-
-        - task: NuGetCommand@2
-          displayName: 'NuGet push'
-          inputs:
-            command: push
-            allowPackageConflicts: true
-            nuGetFeedType: external
-            versioningScheme: byBuildNumber
+    - task: NuGetCommand@2
+      displayName: 'NuGet push'
+      inputs:
+        command: push
+        allowPackageConflicts: true
+        nuGetFeedType: external
+        versioningScheme: byEnvVar
+        versionEnvVar: '$(version)'      
