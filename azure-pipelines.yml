@@ -27,21 +27,23 @@ jobs:
       displayName: Build
       inputs:
         command: build
-        projects: '**/*.csproj'
+        projects: 'JsonEnvelopes.sln'
+#        projects: '**/*.csproj'
         arguments: --configuration $(buildConfiguration)
 
     - task: DotNetCoreCLI@2
       displayName: Test
       inputs:
         command: test
-        projects: '**/*.csproj'
+        projects: '**/JsonEnvelopes.Tests.csproj'
         arguments: '--configuration $(buildConfiguration) --no-restore --no-build -- xunit.parallelizeAssembly=true xunit.parallelizeTestCollections=true'
 
     - task: NuGetCommand@2
       displayName: 'NuGet pack'
       inputs:
         command: pack
-        basePath: './xxxJsonEnvelopes.nuspec'
+        packagesToPack: '**/JsonEnvelopes.csproj'
+        basePath: 'JsonEnvelopes.nuspec'
 
 #    - task: NuGetToolInstaller@1
 #      displayName: 'NuGet push'  
