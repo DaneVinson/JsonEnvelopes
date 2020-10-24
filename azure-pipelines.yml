@@ -3,12 +3,10 @@ trigger:
 
 variables:
   buildConfiguration: 'Release'
-  framework: 'netcoreapp3.1'
-  artifactName: 'JsonEnvelopes'
 
 jobs:
   - job: Build_Test_Publish
-    displayName: 'Build, test and publish to Nuget'
+    displayName: 'Build, test and publish to NuGet'
     pool:
         vmImage: 'windows-latest'
 
@@ -45,16 +43,23 @@ jobs:
         command: pack
         basePath: 'JsonEnvelopes.nuspec'
 
-    - task: NuGetAuthenticate@0
-      displayName: 'NuGet authenticate'
+    - task: NuGetToolInstaller@1
+      displayName: 'NuGet push'  
       inputs:
-        nuGetServiceConnections: 'NuGet'
+        versionSpec: '*'
+        checkLatest: true
+    - script: nuget push JsonEnvelopes.*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey $env:GITHUB-APIKEY
 
-    - task: NuGetCommand@2
-      displayName: 'NuGet push'
-      inputs:
-        command: push
-        allowPackageConflicts: true
-        packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg'
-        feedsToUse: 'config'
-        includeNugetOrg: 'true'
+#    - task: NuGetAuthenticate@0
+#      displayName: 'NuGet authenticate'
+#      inputs:
+#        nuGetServiceConnections: 'NuGet'
+
+#    - task: NuGetCommand@2
+#      displayName: 'NuGet push'
+#      inputs:
+#        command: push
+#        allowPackageConflicts: true
+#        packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg'
+#        feedsToUse: 'config'
+#        includeNugetOrg: 'true'
