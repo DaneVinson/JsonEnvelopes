@@ -10,6 +10,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Solution", "_Solution", "{EA6EA786-09C9-4E02-BF7D-8813BCAA40F0}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		azure-pipelines.yml = azure-pipelines.yml
+		JsonEnvelopes.nuspec = JsonEnvelopes.nuspec
 		LICENSE = LICENSE
 		readme.md = readme.md
 	EndProjectSection

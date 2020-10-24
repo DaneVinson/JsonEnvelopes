@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd">
+  <metadata minClientVersion="4.9.0">
+    <id>JsonEnvelopes</id>
+    <version>0.5.0</version>
+    <title>JsonEnvelopes</title>
+    <authors>Dane Vinson</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">GPL-3.0-only</license>
+    <projectUrl>https://github.com/DaneVinson/JsonEnvelopes</projectUrl>
+    <description>Wrapping System.Text.Json serializations for easy message delivery.</description>
+    <dependencies>
+      <group targetFramework="netstandard2.0">
+        <dependency id="System.Text.Json" version="4.7.2" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+      <file src="JsonEnvelopes\obj\Release\netstandard2.0\JsonEnvelopes.dll" target="lib\JsonEnvelopes.dll" />
+  </files>
+</package>

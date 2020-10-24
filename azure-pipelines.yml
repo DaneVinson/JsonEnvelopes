@@ -47,9 +47,7 @@ jobs:
       displayName: 'NuGet pack'
       inputs:
         command: pack
-        packagesToPack: 'JsonEnvelopes/JsonEnvelopes.csproj'
-        versioningScheme: byEnvVar
-        versionEnvVar: '$(version)'
+        basePath: 'JsonEnvelopes.nuspec'
 
     # - task: NuGetAuthenticate@0
     #   displayName: 'NuGet authenticate'
