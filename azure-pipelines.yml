@@ -49,8 +49,8 @@ jobs:
 #        versionSpec: '*'
 #        checkLatest: true
 
-    - script: nuget push $(System.ArtifactsDirectory)/**/JsonEnvelopes.*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey $(GitHub-ApiKey)
-      displayName: 'Push to nuget.org'
+#    - script: nuget push $(System.ArtifactsDirectory)/**/JsonEnvelopes.*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey $(GitHub-ApiKey)
+#      displayName: 'Push to nuget.org'
 
 #    - task: NuGetAuthenticate@0
 #      displayName: 'NuGet authenticate'
