@@ -43,12 +43,12 @@ jobs:
         command: pack
         basePath: 'JsonEnvelopes.nuspec'
 
-    - task: NuGetToolInstaller@1
-      displayName: 'NuGet push'  
-      inputs:
-        versionSpec: '*'
-        checkLatest: true
-    - script: nuget push JsonEnvelopes.*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey $env:GITHUB-APIKEY
+#    - task: NuGetToolInstaller@1
+#      displayName: 'NuGet push'  
+#      inputs:
+#        versionSpec: '*'
+#        checkLatest: true
+    - script: nuget push $(System.ArtifactsDirectory)/**/JsonEnvelopes.*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey $env:GITHUB-APIKEY
 
 #    - task: NuGetAuthenticate@0
 #      displayName: 'NuGet authenticate'
