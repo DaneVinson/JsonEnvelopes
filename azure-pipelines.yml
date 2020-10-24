@@ -5,10 +5,6 @@ variables:
   buildConfiguration: 'Release'
   framework: 'netcoreapp3.1'
   artifactName: 'JsonEnvelopes'
-  major: '0'
-  minor: '5'
-  patch: '0'
-  version: '0.5.0'
 
 jobs:
   - job: Build_Test_Publish
@@ -49,16 +45,16 @@ jobs:
         command: pack
         basePath: 'JsonEnvelopes.nuspec'
 
-    # - task: NuGetAuthenticate@0
-    #   displayName: 'NuGet authenticate'
-    #   inputs:
-    #     nuGetServiceConnections: 'NuGet'
+    - task: NuGetAuthenticate@0
+      displayName: 'NuGet authenticate'
+      inputs:
+        nuGetServiceConnections: 'NuGet'
 
-    # - task: NuGetCommand@2
-    #   displayName: 'NuGet push'
-    #   inputs:
-    #     command: push
-    #     allowPackageConflicts: true
-    #     nuGetFeedType: external
-    #     versioningScheme: byEnvVar
-    #     versionEnvVar: '$(version)'
+    - task: NuGetCommand@2
+      displayName: 'NuGet push'
+      inputs:
+        command: push
+        allowPackageConflicts: true
+        packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg'
+        feedsToUse: 'config'
+        includeNugetOrg: 'true'
