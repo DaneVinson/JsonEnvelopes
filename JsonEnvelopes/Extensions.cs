@@ -15,9 +15,10 @@ namespace JsonEnvelopes
         {
             var propertyName = nameof(Envelope<object>.Content);
 
-            if (jsonOptions.PropertyNameCaseInsensitive ||
-                jsonOptions.PropertyNamingPolicy == JsonNamingPolicy.CamelCase)
-            { propertyName = propertyName.ToLower(); }
+            if (jsonOptions.PropertyNamingPolicy == JsonNamingPolicy.CamelCase)
+            {
+                propertyName = "content";
+            }
 
             return propertyName;
         }
@@ -30,8 +31,11 @@ namespace JsonEnvelopes
         {
             var propertyName = nameof(Envelope<object>.ContentType);
 
-            if (jsonOptions.PropertyNameCaseInsensitive) { propertyName = propertyName.ToLower(); }
-            else if (jsonOptions.PropertyNamingPolicy == JsonNamingPolicy.CamelCase) { propertyName = "contentType"; }
+            if (jsonOptions.PropertyNamingPolicy == JsonNamingPolicy.CamelCase) 
+            { 
+                propertyName = "contentType";
+            }
+
             return propertyName;
         }
     }

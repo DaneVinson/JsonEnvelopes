@@ -17,8 +17,8 @@ namespace JsonEnvelopes.Example
             (Spellcaster, Location, Level) = (spellcaster, location, level);
 
         public int Level { get; set; }
-        public string Location { get; set; }
-        public string Spellcaster { get; set; }
+        public string? Location { get; set; }
+        public string? Spellcaster { get; set; }
 
         public override string ToString() =>
             $"{Spellcaster} casts a level {Level} Fireball at {Location}";

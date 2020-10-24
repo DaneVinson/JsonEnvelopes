@@ -10,6 +10,9 @@ namespace JsonEnvelopes
     {
         public override Envelope Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
+            var contentTypePropertyName = options.GetContentTypePropertyName();
+            var contentPropertyName = options.GetContentPropertyName();
+            var propertyNameComparison = options.PropertyNameCaseInsensitive ? StringComparison.OrdinalIgnoreCase : default;
             string? propertyName = null;
             var contentType = default(Type);
             var content = default(object);
@@ -19,20 +22,13 @@ namespace JsonEnvelopes
                 switch (reader.TokenType)
                 {
                     case JsonTokenType.PropertyName:
-                        propertyName = reader.GetString().ToLower();
+                        propertyName = reader.GetString();
+                        break;
+                    case JsonTokenType.String:
+                        if (contentTypePropertyName.Equals(propertyName, propertyNameComparison)) { contentType = Type.GetType(JsonSerializer.Deserialize<string>(ref reader, options)); }
                         break;
                     case JsonTokenType.StartObject:
-                    case JsonTokenType.String:
-                        switch (propertyName)
-                        {
-                            case "contenttype":
-                                var typeString = JsonSerializer.Deserialize<string>(ref reader, options);
-                                contentType = Type.GetType(typeString);
-                                break;
-                            case "content":
-                                content = JsonSerializer.Deserialize(ref reader, contentType, options);
-                                break;
-                        }
+                        if (contentPropertyName.Equals(propertyName, propertyNameComparison)) { content = JsonSerializer.Deserialize(ref reader, contentType, options); }
                         break;
                 }
             } while (reader.Read());
@@ -45,23 +41,9 @@ namespace JsonEnvelopes
 
         public override void Write(Utf8JsonWriter writer, Envelope message, JsonSerializerOptions options)
         {
-            // Camel case if requested by options.
-            string contentPropertyName;
-            string contentTypePropertyName;
-            if (options.PropertyNamingPolicy == JsonNamingPolicy.CamelCase)
-            {
-                contentPropertyName = nameof(Envelope<object>.Content).ToLower();
-                contentTypePropertyName = "contentType";    // Ugh, magic string
-            }
-            else
-            {
-                contentPropertyName = nameof(Envelope<object>.Content);
-                contentTypePropertyName = nameof(Envelope<object>.ContentType);
-            }
-
             writer.WriteStartObject();
-            writer.WriteString(contentTypePropertyName, message.ContentType);
-            writer.WritePropertyName(contentPropertyName);
+            writer.WriteString(options.GetContentTypePropertyName(), message.ContentType);
+            writer.WritePropertyName(options.GetContentPropertyName());
             JsonSerializer.Serialize(writer, message.GetContent(), options);
             writer.WriteEndObject();
         }

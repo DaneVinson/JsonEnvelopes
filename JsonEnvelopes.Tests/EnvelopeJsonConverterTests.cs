@@ -6,20 +6,25 @@ namespace JsonEnvelopes.Tests
 {
     public class EnvelopeJsonConverterTests
     {
-        [Fact]
-        public void Serialization_Then_Deserialization_Produces_Equal_Object()
+        [Theory]
+        [InlineData(true, false)]
+        [InlineData(false, false)]
+        [InlineData(true, true)]
+        [InlineData(false, true)]
+        public void Serialization_Then_Deserialization_Produces_Equal_Object(bool useCamelCase, bool caseInsensitive)
         {
+            var jsonOptions = new JsonSerializerOptions() { PropertyNameCaseInsensitive = caseInsensitive };
+            if (useCamelCase) { jsonOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase; }
             var foo = new FooCommand<BarEntity>(new BarEntity("pdq"), "abc");
             var envelope = new Envelope<FooCommand<BarEntity>>(foo);
-            var jsonOptions = new JsonSerializerOptions();
 
             var resultJson = JsonSerializer.Serialize<Envelope>(envelope, jsonOptions);
-            var resultEnvelope = JsonSerializer.Deserialize<Envelope>(resultJson, jsonOptions);
-            var resultFoo = resultEnvelope.GetContent() as FooCommand<BarEntity>;
+            var resultFoo = JsonSerializer.Deserialize<Envelope>(resultJson, jsonOptions)
+                                            .GetContent() as FooCommand<BarEntity>;
 
             Assert.NotNull(resultFoo);
-            Assert.NotNull(foo.Bar.Id);
-            Assert.Equal(foo.Id, resultFoo.Id);
+            Assert.NotNull(foo.Bar!.Id);
+            Assert.Equal(foo.Id, resultFoo!.Id);
             Assert.Equal(foo.Bar.Id, resultFoo.Bar?.Id);
         }
 

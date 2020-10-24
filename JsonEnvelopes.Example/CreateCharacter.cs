@@ -6,15 +6,16 @@ namespace JsonEnvelopes.Example
 {
     public class CreateCharacter
     {
-        public int[] Abilities { get; set; }
-        public string Alignment { get; set; }
+        public int[]? Abilities { get; set; }
+        public string? Alignment { get; set; }
         public DateTime BirthDate { get; set; }
-        public string Class { get; set; }
-        public string CampaignName { get; set; }
-        public string CharacterName { get; set; }
-        public string DungeonMaster { get; set; }
+        public string? Class { get; set; }
+        public string? CampaignName { get; set; }
+        public string? CharacterName { get; set; }
+        public string? DungeonMaster { get; set; }
+        public string? Name { get; set; }
         public Guid PlayerId { get; set; }
-        public string Race { get; set; }
+        public string? Race { get; set; }
         public List<Equipment> StartingEquipment { get; set; } = new List<Equipment>();
         public int StartingHitPoints { get; set; }
         public int StartingLevel { get; set; } = 1;

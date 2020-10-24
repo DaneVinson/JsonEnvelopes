@@ -24,10 +24,12 @@ namespace JsonEnvelopes.Example
                     stopwatch.Restart();
                     for (int i = 0; i < iterations; i++)
                     {
+                        //var jsonEnvelope = JsonSerializer.Serialize<Envelope>(createCharacterEnvelope);
                         var resultEnvelope = JsonSerializer.Deserialize<Envelope>(json);
                     }
                     stopwatch.Stop();
-                    Console.WriteLine($"{iterations} Iterations Deserialize: {stopwatch.ElapsedMilliseconds} ms");
+                    //Console.WriteLine($"Serialize x {iterations}: {stopwatch.ElapsedMilliseconds} ms");
+                    Console.WriteLine($"Deserialize x {iterations}: {stopwatch.ElapsedMilliseconds} ms");
                 }
 
                 //var resultCommand = resultEnvelope.GetContent();

@@ -13,8 +13,8 @@ namespace JsonEnvelopes.Example
             (Name, Notes, Quantity) = (name, notes, quantity);
 
         public int Encumbrance { get; set; }
-        public string Name { get; set; }
-        public string Notes { get; set; }
+        public string? Name { get; set; }
+        public string? Notes { get; set; }
         public int Quantity { get; set; } = 1;
     }
 }

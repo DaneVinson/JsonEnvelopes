@@ -14,7 +14,7 @@ namespace JsonEnvelopes.Tests
 
         public string Id { get; set; } = string.Empty;
 
-        public T Bar { get; set; }
+        public T? Bar { get; set; }
     }
 
     public class BarEntity
