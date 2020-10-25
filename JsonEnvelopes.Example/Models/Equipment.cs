@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace JsonEnvelopes.Example
+namespace JsonEnvelopes.Example.Models
 {
     public class Equipment
     {

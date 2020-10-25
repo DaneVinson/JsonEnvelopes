@@ -1,8 +1,9 @@
-﻿using System;
+﻿using JsonEnvelopes.Example.Models;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace JsonEnvelopes.Example
+namespace JsonEnvelopes.Example.Commands
 {
     public class CreateCharacter
     {
@@ -20,5 +21,10 @@ namespace JsonEnvelopes.Example
         public int StartingHitPoints { get; set; }
         public int StartingLevel { get; set; } = 1;
         public int StartingExperiencePoints { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Name}, Class: {Class}, Race: {Race}";
+        }
     }
 }

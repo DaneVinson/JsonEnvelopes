@@ -1,38 +1,30 @@
-﻿using System;
+﻿using JsonEnvelopes.Example.Commands;
+using JsonEnvelopes.Example.Handlers;
+using JsonEnvelopes.Example.Services;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace JsonEnvelopes.Example
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             try
             {
-                var stopwatch = new Stopwatch();
-                var iterations = 100000;
+                //var envelope = new Envelope<CastFireball>(Utility.NewCastFireballCommand());
+                var envelope = new Envelope<CreateCharacter>(Utility.NewCreateCharacterCommand());
 
-                var castFireballEnvelope = new Envelope<CastFireball>(new CastFireball("Mordenkainen", "x:80, y:20, z:0", 5));
-                var createCharacterEnvelope = new Envelope<CreateCharacter>(GetCreateCharacterCommand());
+                using var sericeProvider = NewServiceProvider();
 
-                var json = JsonSerializer.Serialize<Envelope>(createCharacterEnvelope);
-
-                for (int j = 0; j < 3; j++)
-                {
-                    stopwatch.Restart();
-                    for (int i = 0; i < iterations; i++)
-                    {
-                        //var jsonEnvelope = JsonSerializer.Serialize<Envelope>(createCharacterEnvelope);
-                        var resultEnvelope = JsonSerializer.Deserialize<Envelope>(json);
-                    }
-                    stopwatch.Stop();
-                    //Console.WriteLine($"Serialize x {iterations}: {stopwatch.ElapsedMilliseconds} ms");
-                    Console.WriteLine($"Deserialize x {iterations}: {stopwatch.ElapsedMilliseconds} ms");
-                }
-
-                //var resultCommand = resultEnvelope.GetContent();
+                var dispatcher = sericeProvider.GetService<CommandDispatcher>();
+                await dispatcher.DispatchAsync(envelope);
             }
             catch (Exception ex)
             {
@@ -47,41 +39,39 @@ namespace JsonEnvelopes.Example
             }
         }
 
-        private static CreateCharacter GetCreateCharacterCommand()
+        private static ServiceProvider NewServiceProvider()
         {
-            return new CreateCharacter()
+            return new ServiceCollection()
+                        .AddSingleton<ICommandHandler<CastFireball>, CastFireballHandler>()
+                        .AddSingleton<ICommandHandler<CreateCharacter>, CreateCharacterHandler>()
+                        .AddSingleton<CommandDispatcher>()
+                        .BuildServiceProvider();
+        }
+
+        private static void TimingTests()
+        {
+            var stopwatch = new Stopwatch();
+            var iterations = 100000;
+
+            var castFireballEnvelope = new Envelope<CastFireball>(Utility.NewCastFireballCommand());
+            var createCharacterEnvelope = new Envelope<CreateCharacter>(Utility.NewCreateCharacterCommand());
+
+            var json = JsonSerializer.Serialize<Envelope>(createCharacterEnvelope);
+
+            for (int j = 0; j < 3; j++)
             {
-                Abilities = new int[] { 8, 12, 8, 14, 10, 19 },
-                Alignment = "Neutral Good",
-                BirthDate = DateTime.Today.AddYears(-40),
-                CampaignName = "Weatherstorm",
-                CharacterName = "Sandren Light Fingers",
-                Class = "Bard",
-                DungeonMaster = "Bilbo Baggins",
-                PlayerId = Guid.NewGuid(),
-                Race = "Halfling",
-                StartingHitPoints = 8,
-                StartingLevel = 1,
-                StartingExperiencePoints = 0,
-                StartingEquipment = new List<Equipment>()
-                    {
-                        new Equipment("Leather Armor"),
-                        new Equipment("Short sword"),
-                        new Equipment("Light crossbow"),
-                        new Equipment("Crossbow bolts", quantity: 10),
-                        new Equipment("Mandolin", "Passed down through 5 generations"),
-                        new Equipment("GP", quantity: 8),
-                        new Equipment("Normal clothes"),
-                        new Equipment("Hat", "Broad brimmed with a large feather"),
-                        new Equipment("Backpack"),
-                        new Equipment("Waterskin"),
-                        new Equipment("Rations"),
-                        new Equipment("Bedroll"),
-                        new Equipment("Sack"),
-                        new Equipment("Flint and steel"),
-                        new Equipment("Torches", quantity: 10),
-                    }
-            };
+                stopwatch.Restart();
+                for (int i = 0; i < iterations; i++)
+                {
+                    //var jsonEnvelope = JsonSerializer.Serialize<Envelope>(createCharacterEnvelope);
+                    var resultEnvelope = JsonSerializer.Deserialize<Envelope>(json);
+                }
+                stopwatch.Stop();
+                //Console.WriteLine($"Serialize x {iterations}: {stopwatch.ElapsedMilliseconds} ms");
+                Console.WriteLine($"Deserialize x {iterations}: {stopwatch.ElapsedMilliseconds} ms");
+            }
+
+            //var resultCommand = resultEnvelope.GetContent();
         }
     }
 }

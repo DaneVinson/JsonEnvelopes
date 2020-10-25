@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 
-namespace JsonEnvelopes.Example
+namespace JsonEnvelopes.Example.Commands
 {
     /// <summary>
     /// A command to cast a Fireball spell.
