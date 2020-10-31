@@ -30,7 +30,7 @@ jobs:
         projects: 'JsonEnvelopes.sln'
         arguments: --configuration $(buildConfiguration)
 
-    - script: dir '$(Build.SourcesDirectory)'
+    - script: dir "$(Build.SourcesDirectory)"
       displayName: 'dir command'
 
 #    - task: DotNetCoreCLI@2
@@ -53,7 +53,7 @@ jobs:
         versionSpec: '*'
         checkLatest: true
 
-    - script: nuget pack '$(Build.SourcesDirectory)\JsonEnvelopes.nuspec'
+    - script: nuget pack "$(Build.SourcesDirectory)\JsonEnvelopes.nuspec"
       displayName: NuGet pack
 
 #    - script: nuget push $(System.ArtifactsDirectory)/**/JsonEnvelopes.*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey $(GitHub-ApiKey)
