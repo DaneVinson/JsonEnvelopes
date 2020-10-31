@@ -37,18 +37,21 @@ jobs:
         projects: '**/JsonEnvelopes.Tests.csproj'
         arguments: '--configuration $(buildConfiguration) --no-restore --no-build -- xunit.parallelizeAssembly=true xunit.parallelizeTestCollections=true'
 
-    - task: NuGetCommand@2
-      displayName: 'NuGet pack'
-      inputs:
-        command: pack
-        packagesToPack: '**/JsonEnvelopes.csproj'
-        basePath: '/JsonEnvelopes.nuspec'
-
-#    - task: NuGetToolInstaller@1
-#      displayName: 'Install NuGet'  
+#    - task: NuGetCommand@2
+#      displayName: 'NuGet pack'
 #      inputs:
-#        versionSpec: '*'
-#        checkLatest: true
+#        command: pack
+#        packagesToPack: '**/JsonEnvelopes.csproj'
+#        basePath: '/JsonEnvelopes.nuspec'
+
+    - task: NuGetToolInstaller@1
+      displayName: 'Install NuGet'  
+      inputs:
+        versionSpec: '*'
+        checkLatest: true
+
+    - script: nuget pack '/JsonEnvelopes.nuspec'
+      displayName: NuGet pack
 
 #    - script: nuget push $(System.ArtifactsDirectory)/**/JsonEnvelopes.*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey $(GitHub-ApiKey)
 #      displayName: 'Push to nuget.org'
