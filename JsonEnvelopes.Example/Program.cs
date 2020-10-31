@@ -18,8 +18,8 @@ namespace JsonEnvelopes.Example
         {
             try
             {
-                //var envelope = new Envelope<CastFireball>(Utility.NewCastFireballCommand());
-                var envelope = new Envelope<CreateCharacter>(Utility.NewCreateCharacterCommand());
+                var envelope = new Envelope<CastFireball>(Utility.NewCastFireballCommand());
+                //var envelope = new Envelope<CreateCharacter>(Utility.NewCreateCharacterCommand());
 
                 using var sericeProvider = NewServiceProvider();
 

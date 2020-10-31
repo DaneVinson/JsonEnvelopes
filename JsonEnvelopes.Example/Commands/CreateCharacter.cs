@@ -24,7 +24,7 @@ namespace JsonEnvelopes.Example.Commands
 
         public override string ToString()
         {
-            return $"{Name}, Class: {Class}, Race: {Race}";
+            return $"Create {Name}, Class: {Class}, Race: {Race}";
         }
     }
 }
