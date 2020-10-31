@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace JsonEnvelopes.Example.Handlers
 {
-    public class CreateCharacterHandler : ICommandHandler<CreateCharacter>
+    public class CreateCharacterHandler : ICommandHandler<CreateCharacter>, IRequestHandler<CreateCharacter, bool>
     {
         public Task<bool> HandleAsync(CreateCharacter command)
         {
@@ -20,6 +20,9 @@ namespace JsonEnvelopes.Example.Handlers
 
         public Task<bool> HandleAsync(object command) =>
             HandleAsync((CreateCharacter)command);
+
+        public Task<bool> Handle(CreateCharacter command, CancellationToken cancellationToken) =>
+            HandleAsync(command);
     }
 
 

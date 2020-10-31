@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace JsonEnvelopes.Example.Handlers
 {
-    public class CastFireballHandler : ICommandHandler<CastFireball>
+    public class CastFireballHandler : ICommandHandler<CastFireball>, IRequestHandler<CastFireball, bool>
     {
         public Task<bool> HandleAsync(CastFireball command)
         {
@@ -20,16 +20,8 @@ namespace JsonEnvelopes.Example.Handlers
 
         public Task<bool> HandleAsync(object command) =>
             HandleAsync((CastFireball)command);
-    }
 
-
-    public class CastFireballMediatRHandler : IRequestHandler<CastFireball, bool>
-    {
-        public Task<bool> Handle(CastFireball command, CancellationToken cancellationToken)
-        {
-            Console.WriteLine($"{command}");
-
-            return Task.FromResult(true);
-        }
+        public Task<bool> Handle(CastFireball command, CancellationToken cancellationToken) =>
+            HandleAsync(command);
     }
 }
