@@ -51,8 +51,8 @@ jobs:
         versionSpec: '*'
         checkLatest: true
 
-    - script: echo "apikey: $(GitHub-ApiKey)"
-    - script: echo "apikey: $env:GITHUB-APIKEY
+    - script: echo "apikey $(GitHub-ApiKey)"
+    - script: echo "apikey $env:GITHUB-APIKEY"
     - script: nuget push $(System.ArtifactsDirectory)/**/JsonEnvelopes.*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey $(GitHub-ApiKey)
       displayName: 'Push to nuget.org'
 
