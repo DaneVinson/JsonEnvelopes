@@ -30,45 +30,21 @@ jobs:
         projects: 'JsonEnvelopes.sln'
         arguments: --configuration $(buildConfiguration)
 
-    - script: dir "$(Build.SourcesDirectory)"
-      displayName: 'dir command'
-
-#    - task: DotNetCoreCLI@2
-#      displayName: Test
-#      inputs:
-#        command: test
-#        projects: '**/JsonEnvelopes.Tests.csproj'
-#        arguments: '--configuration $(buildConfiguration) --no-restore --no-build -- xunit.parallelizeAssembly=true xunit.parallelizeTestCollections=true'
-
-#    - task: NuGetCommand@2
-#      displayName: 'NuGet pack'
-#      inputs:
-#        command: pack
-#        packagesToPack: '**/JsonEnvelopes.csproj'
-#        basePath: '/JsonEnvelopes.nuspec'
+    - task: DotNetCoreCLI@2
+      displayName: Test
+      inputs:
+        command: test
+        projects: '**/JsonEnvelopes.Tests.csproj'
+        arguments: '--configuration $(buildConfiguration) --no-restore --no-build -- xunit.parallelizeAssembly=true xunit.parallelizeTestCollections=true'
 
     - task: NuGetToolInstaller@1
-      displayName: 'Install NuGet'  
+      displayName: 'Install nuget'  
       inputs:
         versionSpec: '*'
         checkLatest: true
 
     - script: nuget pack "$(Build.SourcesDirectory)\JsonEnvelopes.nuspec"
-      displayName: NuGet pack
+      displayName: nuget pack
 
-#    - script: nuget push $(System.ArtifactsDirectory)/**/JsonEnvelopes.*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey $(GitHub-ApiKey)
-#      displayName: 'Push to nuget.org'
-
-#    - task: NuGetAuthenticate@0
-#      displayName: 'NuGet authenticate'
-#      inputs:
-#        nuGetServiceConnections: 'NuGet'
-
-#    - task: NuGetCommand@2
-#      displayName: 'NuGet push'
-#      inputs:
-#        command: push
-#        allowPackageConflicts: true
-#        packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg'
-#        feedsToUse: 'config'
-#        includeNugetOrg: 'true'
+    - script: nuget push $(System.ArtifactsDirectory)/**/JsonEnvelopes.*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey $(GitHub-ApiKey)
+      displayName: 'nuget push -> nuget.org'
