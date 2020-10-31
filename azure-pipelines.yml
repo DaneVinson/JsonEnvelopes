@@ -50,7 +50,7 @@ jobs:
         versionSpec: '*'
         checkLatest: true
 
-    - script: nuget pack '/JsonEnvelopes.nuspec'
+    - script: nuget pack '**/JsonEnvelopes.nuspec'
       displayName: NuGet pack
 
 #    - script: nuget push $(System.ArtifactsDirectory)/**/JsonEnvelopes.*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey $(GitHub-ApiKey)
