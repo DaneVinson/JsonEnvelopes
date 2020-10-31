@@ -23,6 +23,9 @@ jobs:
         command: restore
         projects: '**/*.csproj'
 
+    - script: dir '$(Build.SourcesDirectory)'
+      displayName: 'dir command'
+
     - task: DotNetCoreCLI@2
       displayName: Build
       inputs:
@@ -30,12 +33,12 @@ jobs:
         projects: 'JsonEnvelopes.sln'
         arguments: --configuration $(buildConfiguration)
 
-    - task: DotNetCoreCLI@2
-      displayName: Test
-      inputs:
-        command: test
-        projects: '**/JsonEnvelopes.Tests.csproj'
-        arguments: '--configuration $(buildConfiguration) --no-restore --no-build -- xunit.parallelizeAssembly=true xunit.parallelizeTestCollections=true'
+#    - task: DotNetCoreCLI@2
+#      displayName: Test
+#      inputs:
+#        command: test
+#        projects: '**/JsonEnvelopes.Tests.csproj'
+#        arguments: '--configuration $(buildConfiguration) --no-restore --no-build -- xunit.parallelizeAssembly=true xunit.parallelizeTestCollections=true'
 
 #    - task: NuGetCommand@2
 #      displayName: 'NuGet pack'
@@ -50,7 +53,6 @@ jobs:
         versionSpec: '*'
         checkLatest: true
 
-    - script: echo '$(Build.SourcesDirectory)\JsonEnvelopes.nuspec'
     - script: nuget pack '$(Build.SourcesDirectory)\JsonEnvelopes.nuspec'
       displayName: NuGet pack
 
