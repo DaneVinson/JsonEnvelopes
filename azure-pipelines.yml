@@ -28,7 +28,6 @@ jobs:
       inputs:
         command: build
         projects: 'JsonEnvelopes.sln'
-#        projects: '**/*.csproj'
         arguments: --configuration $(buildConfiguration)
 
     - task: DotNetCoreCLI@2
@@ -43,18 +42,16 @@ jobs:
       inputs:
         command: pack
         packagesToPack: '**/JsonEnvelopes.csproj'
-        basePath: 'JsonEnvelopes.nuspec'
+        basePath: '/JsonEnvelopes.nuspec'
 
-    - task: NuGetToolInstaller@1
-      displayName: 'NuGet push'  
-      inputs:
-        versionSpec: '*'
-        checkLatest: true
+#    - task: NuGetToolInstaller@1
+#      displayName: 'Install NuGet'  
+#      inputs:
+#        versionSpec: '*'
+#        checkLatest: true
 
-    - script: echo "apikey $(GitHub-ApiKey)"
-    - script: echo "apikey $env:GITHUB-APIKEY"
-    - script: nuget push $(System.ArtifactsDirectory)/**/JsonEnvelopes.*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey $(GitHub-ApiKey)
-      displayName: 'Push to nuget.org'
+#    - script: nuget push $(System.ArtifactsDirectory)/**/JsonEnvelopes.*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey $(GitHub-ApiKey)
+#      displayName: 'Push to nuget.org'
 
 #    - task: NuGetAuthenticate@0
 #      displayName: 'NuGet authenticate'
