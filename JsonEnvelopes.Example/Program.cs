@@ -1,12 +1,14 @@
 ﻿using JsonEnvelopes.Example.Commands;
 using JsonEnvelopes.Example.Handlers;
 using JsonEnvelopes.Example.Services;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -18,18 +20,37 @@ namespace JsonEnvelopes.Example
         {
             try
             {
-                var envelope = new Envelope<CastFireball>(Utility.NewCastFireballCommand());
-                //var envelope = new Envelope<CreateCharacter>(Utility.NewCreateCharacterCommand());
+                var envelopes = new List<Envelope>()
+                {
+                    new Envelope<CastFireball>(Utility.NewCastFireballCommand()),
+                    new Envelope<CreateCharacter>(Utility.NewCreateCharacterCommand())
+                };
+
+                var jsonEnvelopes = envelopes
+                                        .Select(envelope => JsonSerializer.Serialize(envelope))
+                                        .ToList();
+
+                envelopes = jsonEnvelopes
+                                        .Select(json => JsonSerializer.Deserialize<Envelope>(json))
+                                        .ToList();
 
                 using var sericeProvider = NewServiceProvider();
-
+                var mediator = sericeProvider.GetService<IMediator>();
                 var dispatcher = sericeProvider.GetService<CommandDispatcher>();
-                await dispatcher.DispatchAsync(envelope);
+
+                Console.WriteLine("=== Command handling with MediatR ===");
+                var mediatrTasks = envelopes.Select(envelope => mediator.Send(envelope.GetContent()));
+                await Task.WhenAll(mediatrTasks);
+                Console.WriteLine();
+
+                Console.WriteLine($"=== Command handling with {typeof(CommandDispatcher).FullName} ===");
+                var dispatcherTasks = envelopes.Select(envelope => dispatcher.DispatchAsync(envelope));
+                await Task.WhenAll(dispatcherTasks);
             }
             catch (Exception ex)
             {
                 Console.WriteLine("{0} - {1}", ex.GetType(), ex.Message);
-                Console.WriteLine(ex.StackTrace ?? String.Empty);
+                Console.WriteLine(ex.StackTrace ?? string.Empty);
             }
             finally
             {
@@ -42,6 +63,7 @@ namespace JsonEnvelopes.Example
         private static ServiceProvider NewServiceProvider()
         {
             return new ServiceCollection()
+                        .AddMediatR(typeof(Program))
                         .AddSingleton<ICommandHandler<CastFireball>, CastFireballHandler>()
                         .AddSingleton<ICommandHandler<CreateCharacter>, CreateCharacterHandler>()
                         .AddSingleton<CommandDispatcher>()

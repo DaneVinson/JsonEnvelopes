@@ -1,11 +1,11 @@
-﻿using JsonEnvelopes.Example.Models;
+﻿using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace JsonEnvelopes.Example.Commands
 {
-    public class CreateCharacter
+    public class CreateCharacter : ICommand, IRequest<bool>
     {
         public int[]? Abilities { get; set; }
         public string? Alignment { get; set; }
@@ -24,7 +24,21 @@ namespace JsonEnvelopes.Example.Commands
 
         public override string ToString()
         {
-            return $"Create {Name}, Class: {Class}, Race: {Race}";
+            return $"Create {Name}, {Race} {Class}";
         }
+    }
+
+    public class Equipment
+    {
+        public Equipment()
+        { }
+
+        public Equipment(string name, string notes = "", int quantity = 1) =>
+            (Name, Notes, Quantity) = (name, notes, quantity);
+
+        public int Encumbrance { get; set; }
+        public string? Name { get; set; }
+        public string? Notes { get; set; }
+        public int Quantity { get; set; } = 1;
     }
 }

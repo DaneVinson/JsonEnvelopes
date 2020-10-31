@@ -1,5 +1,4 @@
 ﻿using JsonEnvelopes.Example.Commands;
-using JsonEnvelopes.Example.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,7 +18,7 @@ namespace JsonEnvelopes.Example
                 CharacterName = "Sandren Light Fingers",
                 Class = "Bard",
                 DungeonMaster = "The DM",
-                Name = "Marco the Bard",
+                Name = "Marco Quick Fingers",
                 PlayerId = Guid.NewGuid(),
                 Race = "Halfling",
                 StartingHitPoints = 8,

@@ -6,7 +6,7 @@ variables:
 
 jobs:
   - job: Build_Test_Publish
-    displayName: 'Build, test and publish to NuGet'
+    displayName: 'Windows: build, test and publish to nuget.org'
     pool:
         vmImage: 'windows-latest'
 
