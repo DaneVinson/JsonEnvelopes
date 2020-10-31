@@ -2,13 +2,13 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd">
   <metadata minClientVersion="4.9.0">
     <id>JsonEnvelopes</id>
-    <version>0.6.1</version>
+    <version>0.6.2</version>
     <title>JsonEnvelopes</title>
     <authors>Dane Vinson</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">GPL-3.0-only</license>
     <projectUrl>https://github.com/DaneVinson/JsonEnvelopes</projectUrl>
-    <description>Standardized messaging using System.Text.Json serializations.</description>
+    <description>Standardized messaging serialization leveraging System.Text.Json.</description>
     <dependencies>
       <group targetFramework="netstandard2.0">
         <dependency id="System.Text.Json" version="4.7.2" />

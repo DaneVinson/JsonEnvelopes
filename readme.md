@@ -1,2 +1,2 @@
 ## Json Envelopes
-Standardized messaging using System.Text.Json serializations.
+Standardized messaging serialization leveraging System.Text.Json.
