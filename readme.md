@@ -2,7 +2,7 @@
 Standardized messaging with System.Text.Json serialization.
 
 ## Purpose
-Preform serialization/deserialization of messages such that receiving services cam be agnostic with respect to message type.
+Preform serialization/deserialization of messages such that receiving services can be agnostic with respect to message type.
 
 ## Get started
 Install the [`JsonEnvelopes` NuGet Package](https://www.nuget.org/packages/JsonEnvelopes/) (e.g. version 0.6.3 from CLI).
