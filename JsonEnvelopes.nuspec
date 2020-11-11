@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd">
   <metadata minClientVersion="4.9.0">
     <id>JsonEnvelopes</id>
-    <version>0.6.3</version>
+    <version>1.0.0</version>
     <title>JsonEnvelopes</title>
     <authors>Dane Vinson</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
