@@ -33,7 +33,7 @@ The envelope's `GetContent` method returns an `object` which is of the type prov
     var success = contentType == typeof(CastFireball);
 
 ## Examples
-See the project `JsonEnvelopes.Example` for examples of JsonEnvelopes message handling with Dependency Injection and additionally with [MediatR](https://github.com/jbogard/MediatR);
+See the project `JsonEnvelopes.Example` for examples of JsonEnvelopes message handling with Dependency Injection and additionally with [MediatR](https://github.com/jbogard/MediatR).
 
 ## Credits
 The methodology used by `JsonEnvelopes` was heavily inspired by the work of the extraordinary developer and my former colleague, [Jonathan Berube](https://github.com/joncloud). My thanks to him.
