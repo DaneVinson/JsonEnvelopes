@@ -15,7 +15,7 @@ Any class with a default constructor can be wrapped with `Envelope<T>`, e.g. the
     var command = new CastFireball();
     var envelope = new Envelope<CastFireball>(command);
 
-Serialize the envelope by calling `JsonSerializer.Serialize<Envelope>` (`System.Test.Json` namespace) and passing it an `Envelope<T>` instance. Note that the generic argument passed to `Serialize` is of type `Envelope` not of type `Envelope<T>`. This triggers the use of `EnvelopeJsonConverter`'s customized serialization operations (i.e. Read/Write);
+Serialize the envelope by calling `JsonSerializer.Serialize<Envelope>` (`System.Text.Json` namespace) and passing it an `Envelope<T>` instance. Note that the generic argument passed to `Serialize` is of type `Envelope` not of type `Envelope<T>`. This triggers the use of `EnvelopeJsonConverter`'s customized serialization operations (i.e. Read/Write);
 
     var json = JsonSerializer.Serialize<Envelope>(envelope);
 
@@ -36,4 +36,4 @@ The envelope's `GetContent` method returns an `object` which is of the type prov
 See the project `JsonEnvelopes.Example` for examples of JsonEnvelopes message handling with Dependency Injection and additionally with [MediatR](https://github.com/jbogard/MediatR).
 
 ## Credits
-The methodology used by `JsonEnvelopes` was heavily inspired by the work of the extraordinary developer and my former colleague, [Jonathan Berube](https://github.com/joncloud). My thanks to him.
+The methodology used in `JsonEnvelopes` was heavily inspired by the work of the extraordinary developer [Jonathan Berube](https://github.com/joncloud). My thanks to him.
