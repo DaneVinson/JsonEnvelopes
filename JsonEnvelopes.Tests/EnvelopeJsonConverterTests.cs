@@ -49,5 +49,21 @@ namespace JsonEnvelopes.Tests
             Assert.Contains($"\"{contentTypePropertyName}\":", json, StringComparison.Ordinal);
             Assert.Contains($"\"{contentPropertyName}\":", json, StringComparison.Ordinal);
         }
+
+        [Fact]
+        public void Deserialization_Throws_TypeLoadException_When_UnknownType()
+        {
+            var foo = new FooCommand<BarEntity>();
+            var envelope = new Envelope<FooCommand<BarEntity>>(foo);
+
+            var resultJson = JsonSerializer.Serialize<Envelope>(envelope);
+            resultJson = resultJson.Replace("JsonEnvelopes.Tests.FooCommand", "NewNamespace.FooCommand");
+
+            Assert.Throws<TypeLoadException>(() =>
+            {
+                var resultFoo = JsonSerializer.Deserialize<Envelope>(resultJson)
+                    .GetContent() as FooCommand<BarEntity>;
+            });
+        }
     }
 }
