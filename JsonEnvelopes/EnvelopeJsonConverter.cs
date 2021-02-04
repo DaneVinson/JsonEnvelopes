@@ -25,7 +25,7 @@ namespace JsonEnvelopes
                         propertyName = reader.GetString();
                         break;
                     case JsonTokenType.String:
-                        if (contentTypePropertyName.Equals(propertyName, propertyNameComparison)) { contentType = Type.GetType(JsonSerializer.Deserialize<string>(ref reader, options)); }
+                        if (contentTypePropertyName.Equals(propertyName, propertyNameComparison)) { contentType = Type.GetType(JsonSerializer.Deserialize<string>(ref reader, options), true); }
                         break;
                     case JsonTokenType.StartObject:
                         if (contentPropertyName.Equals(propertyName, propertyNameComparison)) { content = JsonSerializer.Deserialize(ref reader, contentType, options); }
