@@ -3,11 +3,11 @@
   <metadata minClientVersion="4.9.0">
     <id>JsonEnvelopes</id>
     <!--Match value in JsonEnvelopes.csproj-->
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <title>JsonEnvelopes</title>
     <authors>Dane Vinson</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <license type="expression">GPL-3.0-only</license>
+    <license type="expression">MIT</license>
     <projectUrl>https://github.com/DaneVinson/JsonEnvelopes</projectUrl>
     <description>Standardized messaging with System.Text.Json serialization.</description>
     <dependencies>
