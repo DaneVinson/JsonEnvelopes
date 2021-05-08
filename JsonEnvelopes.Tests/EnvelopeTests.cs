@@ -13,12 +13,6 @@ namespace JsonEnvelopes.Tests
             var foo = new FooCommand<BarEntity>(new BarEntity("bar1"), "foo1");
 
             var envelope = Envelope.WrapContent(foo);
-            if (envelope == null)
-            {
-                Assert.NotNull(envelope);
-                return;
-            }
-
             var content = envelope.GetContent();
 
             Assert.Equal(foo.GetType(), content.GetType());
