@@ -14,10 +14,10 @@ namespace JsonEnvelopes
         /// <summary>
         /// Wrap any content in an <see cref="Envelope{TContent}"/> and return as an <see cref="Envelope"/>.
         /// </summary>
-        public static Envelope? WrapContent(object content) =>
-            Activator.CreateInstance(
-                        typeof(Envelope<>).MakeGenericType(content.GetType()),
-                        content) as Envelope;
+        public static Envelope WrapContent(object content) =>
+            (Activator.CreateInstance(
+                            typeof(Envelope<>).MakeGenericType(content.GetType()),
+                            content) as Envelope)!;
 
         public abstract object GetContent();
 
