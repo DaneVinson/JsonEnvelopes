@@ -23,7 +23,7 @@ namespace JsonEnvelopes.Example
                 var envelopes = new List<Envelope>()
                 {
                     new Envelope<CastFireball>(Utility.NewCastFireballCommand()),
-                    new Envelope<CreateCharacter>(Utility.NewCreateCharacterCommand())
+                    Envelope.WrapContent(Utility.NewCreateCharacterCommand())!
                 };
 
                 var jsonEnvelopes = envelopes
