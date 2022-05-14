@@ -1,9 +1,9 @@
 trigger:
-- master
+- main
 
 variables:
   buildConfiguration: 'Release'
-  isMasterBranch: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
+  isMainBranch: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
   
 jobs:
   - job: Build_Test_Publish
@@ -49,4 +49,4 @@ jobs:
 
     - script: nuget push "$(Build.SourcesDirectory)\JsonEnvelopes.*.nupkg" -Source https://api.nuget.org/v3/index.json -ApiKey $(NuGet-ApiKey)
       displayName: 'nuget push -> nuget.org'
-      condition: and(succeeded(), eq(variables.isMasterBranch, 'true'))
+      condition: and(succeeded(), eq(variables.isMainBranch, 'True'))
