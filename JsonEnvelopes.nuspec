@@ -3,13 +3,16 @@
   <metadata minClientVersion="5.0.0">
     <id>JsonEnvelopes</id>
     <!--Match value in JsonEnvelopes.csproj and readme.md-->
-    <version>2.0.0</version>
+    <version>2.0.1</version>
     <title>JsonEnvelopes</title>
     <authors>Dane Vinson</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
     <projectUrl>https://github.com/DaneVinson/JsonEnvelopes</projectUrl>
     <description>Standardized messaging with .NET 6 serialization (System.Text.Json).</description>
+    <dependencies>
+      <group targetFramework="net6.0"/>
+    </dependencies>  
   </metadata>
   <files>
       <file src="JsonEnvelopes\bin\Release\net6.0\JsonEnvelopes.dll" target="lib\net6.0\JsonEnvelopes.dll" />
