@@ -49,4 +49,4 @@ jobs:
 
     - script: nuget push "$(Build.SourcesDirectory)\JsonEnvelopes.*.nupkg" -Source https://api.nuget.org/v3/index.json -ApiKey $(NuGet-ApiKey)
       displayName: 'nuget push -> nuget.org'
-      condition: eq(variables.isMasterBranch, 'true'))
+      condition: and(succeeded(), eq(variables.isMasterBranch, 'true'))
