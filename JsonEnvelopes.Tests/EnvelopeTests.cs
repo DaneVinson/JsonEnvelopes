@@ -1,30 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Xunit;
+﻿namespace JsonEnvelopes.Tests;
 
-namespace JsonEnvelopes.Tests
+public class EnvelopeTests
 {
-    public class EnvelopeTests
+    [Fact]
+    public void WrapContent_Test()
     {
-        [Fact]
-        public void WrapContent_Test()
+        var foo = new FooCommand<BarEntity>(new BarEntity("bar1"), "foo1");
+
+        var envelope = Envelope.WrapContent(foo);
+        var content = envelope.GetContent();
+
+        Assert.Equal(foo.GetType(), content.GetType());
+        var fooContent = content as FooCommand<BarEntity>;
+        if (fooContent == null)
         {
-            var foo = new FooCommand<BarEntity>(new BarEntity("bar1"), "foo1");
-
-            var envelope = Envelope.WrapContent(foo);
-            var content = envelope.GetContent();
-
-            Assert.Equal(foo.GetType(), content.GetType());
-            var fooContent = content as FooCommand<BarEntity>;
-            if (fooContent == null)
-            {
-                Assert.NotNull(fooContent);
-                return;
-            }
-
-            Assert.Equal(foo.Id, fooContent.Id);
-            Assert.Equal(foo.Bar!.Id, fooContent.Bar!.Id);
+            Assert.NotNull(fooContent);
+            return;
         }
+
+        Assert.Equal(foo.Id, fooContent.Id);
+        Assert.Equal(foo.Bar!.Id, fooContent.Bar!.Id);
     }
 }

@@ -3,7 +3,8 @@ trigger:
 
 variables:
   buildConfiguration: 'Release'
-
+  isMasterBranch: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
+  
 jobs:
   - job: Build_Test_Publish
     displayName: 'Windows: build, test and publish to nuget.org'
@@ -12,10 +13,10 @@ jobs:
 
     steps:
     - task: UseDotNet@2
-      displayName: Install .NET Core SDK
+      displayName: Install .NET 6 SDK
       inputs:
         packageType: 'sdk'
-        version: 3.x
+        version: 6.x
 
     - task: DotNetCoreCLI@2
       displayName: Restore
@@ -48,3 +49,4 @@ jobs:
 
     - script: nuget push "$(Build.SourcesDirectory)\JsonEnvelopes.*.nupkg" -Source https://api.nuget.org/v3/index.json -ApiKey $(NuGet-ApiKey)
       displayName: 'nuget push -> nuget.org'
+      condition: and(succeeded(), eq(variables.isMasterBranch, 'true'))
