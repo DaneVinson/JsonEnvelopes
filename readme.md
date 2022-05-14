@@ -5,9 +5,9 @@ Standardized messaging with System.Text.Json serialization.
 Preform serialization/deserialization of messages such that receiving services can be agnostic with respect to message type.
 
 ## Get started
-Install the [`JsonEnvelopes` NuGet Package](https://www.nuget.org/packages/JsonEnvelopes/) (e.g. version 2.0.0).
+Install the [`JsonEnvelopes` NuGet Package](https://www.nuget.org/packages/JsonEnvelopes/) (e.g. version 2.0.1).
 
-    dotnet add package JsonEnvelopes --version 2.0.0
+    dotnet add package JsonEnvelopes --version 2.0.1
 
 ## Usage
 Any class with a default constructor can be wrapped with `Envelope<T>`, e.g. the command `CastFireball`.
