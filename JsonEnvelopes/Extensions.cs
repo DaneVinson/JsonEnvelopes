@@ -4,37 +4,14 @@
 
 namespace JsonEnvelopes;
 
-public static class Extensions
+internal static class Extensions
 {
-    /// <summary>
-    /// Use the <see cref="JsonSerializerOptions"/> object to determine the expected name of the 
-    /// <see cref="Envelope{TContent}"/>'s Content property.
-    /// </summary>
-    public static string GetContentPropertyName(this JsonSerializerOptions jsonOptions)
-    {
-        var propertyName = nameof(Envelope<object>.Content);
+    internal static string GetContentPropertyName(this JsonSerializerOptions jsonOptions) =>
+        ConvertName(jsonOptions, nameof(Envelope<object>.Content));
 
-        if (jsonOptions.PropertyNamingPolicy == JsonNamingPolicy.CamelCase)
-        {
-            propertyName = "content";
-        }
+    internal static string GetContentTypePropertyName(this JsonSerializerOptions jsonOptions) =>
+        ConvertName(jsonOptions, nameof(Envelope<object>.ContentType));
 
-        return propertyName;
-    }
-
-    /// <summary>
-    /// Use the <see cref="JsonSerializerOptions"/> object to determine the expected name of the 
-    /// <see cref="Envelope{TContent}"/>'s ContentType property.
-    /// </summary>
-    public static string GetContentTypePropertyName(this JsonSerializerOptions jsonOptions)
-    {
-        var propertyName = nameof(Envelope<object>.ContentType);
-
-        if (jsonOptions.PropertyNamingPolicy == JsonNamingPolicy.CamelCase) 
-        { 
-            propertyName = "contentType";
-        }
-
-        return propertyName;
-    }
+    private static string ConvertName(JsonSerializerOptions jsonOptions, string propertyName) =>
+        jsonOptions.PropertyNamingPolicy?.ConvertName(propertyName) ?? propertyName;
 }

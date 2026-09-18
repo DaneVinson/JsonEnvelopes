@@ -27,3 +27,8 @@ public class BarEntity
 }
 
 public record TeleportCommand(string Destination, int Range);
+
+public class BarList
+{
+    public List<BarEntity> Bars { get; set; } = new();
+}
