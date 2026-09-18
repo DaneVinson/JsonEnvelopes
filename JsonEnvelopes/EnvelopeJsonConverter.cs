@@ -23,7 +23,7 @@ public class EnvelopeJsonConverter : JsonConverter<Envelope>
     /// <exception cref="ArgumentNullException"><paramref name="registry"/> is null.</exception>
     public EnvelopeJsonConverter(EnvelopeTypeRegistry registry)
     {
-        ArgumentNullException.ThrowIfNull(registry);
+        if (registry is null) { throw new ArgumentNullException(nameof(registry)); }
 
         _registry = registry;
     }
@@ -61,7 +61,10 @@ public class EnvelopeJsonConverter : JsonConverter<Envelope>
             }
 
             var contentTypeName = contentTypeElement.GetString();
-            if (string.IsNullOrEmpty(contentTypeName))
+            // Checked explicitly rather than with string.IsNullOrEmpty: the netstandard2.0
+            // reference assemblies carry no nullability annotations, so the compiler cannot
+            // narrow contentTypeName to non-null through that call.
+            if (contentTypeName is null || contentTypeName.Length == 0)
             {
                 throw new JsonException($"The envelope JSON has an empty '{contentTypePropertyName}' property.");
             }
@@ -120,8 +123,8 @@ public class EnvelopeJsonConverter : JsonConverter<Envelope>
     /// <exception cref="InvalidOperationException">The content's type is not registered.</exception>
     public override void Write(Utf8JsonWriter writer, Envelope value, JsonSerializerOptions options)
     {
-        ArgumentNullException.ThrowIfNull(writer);
-        ArgumentNullException.ThrowIfNull(value);
+        if (writer is null) { throw new ArgumentNullException(nameof(writer)); }
+        if (value is null) { throw new ArgumentNullException(nameof(value)); }
 
         var registry = RequireRegistry();
         var content = value.GetContent();

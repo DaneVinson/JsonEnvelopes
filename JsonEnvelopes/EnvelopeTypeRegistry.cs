@@ -26,7 +26,7 @@ public sealed class EnvelopeTypeRegistry
     /// <exception cref="ArgumentNullException"><paramref name="configure"/> is null.</exception>
     public static EnvelopeTypeRegistry Create(Action<EnvelopeTypeRegistryBuilder> configure)
     {
-        ArgumentNullException.ThrowIfNull(configure);
+        if (configure is null) { throw new ArgumentNullException(nameof(configure)); }
 
         var builder = new EnvelopeTypeRegistryBuilder();
         configure(builder);
@@ -40,7 +40,7 @@ public sealed class EnvelopeTypeRegistry
     /// <exception cref="InvalidOperationException"><paramref name="contentType"/> is not registered.</exception>
     public string GetName(Type contentType)
     {
-        ArgumentNullException.ThrowIfNull(contentType);
+        if (contentType is null) { throw new ArgumentNullException(nameof(contentType)); }
 
         if (!_namesByType.TryGetValue(contentType, out var name))
         {
@@ -58,7 +58,7 @@ public sealed class EnvelopeTypeRegistry
     /// <exception cref="ArgumentNullException"><paramref name="contentType"/> is null.</exception>
     public bool TryGetName(Type contentType, out string? name)
     {
-        ArgumentNullException.ThrowIfNull(contentType);
+        if (contentType is null) { throw new ArgumentNullException(nameof(contentType)); }
 
         return _namesByType.TryGetValue(contentType, out name);
     }
@@ -77,7 +77,7 @@ public sealed class EnvelopeTypeRegistry
     /// <exception cref="InvalidOperationException">The content's type is not registered.</exception>
     public Envelope Wrap(object content)
     {
-        ArgumentNullException.ThrowIfNull(content);
+        if (content is null) { throw new ArgumentNullException(nameof(content)); }
 
         var name = GetName(content.GetType());
         return _registrationsByName[name].Factory(content);

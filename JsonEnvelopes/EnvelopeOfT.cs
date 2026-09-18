@@ -11,7 +11,7 @@ public class Envelope<TContent> : Envelope where TContent : class
     /// <exception cref="ArgumentNullException"><paramref name="content"/> is null.</exception>
     public Envelope(TContent content)
     {
-        ArgumentNullException.ThrowIfNull(content);
+        if (content is null) { throw new ArgumentNullException(nameof(content)); }
 
         Content = content;
     }
