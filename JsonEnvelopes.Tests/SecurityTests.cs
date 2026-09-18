@@ -38,9 +38,9 @@ public class SecurityTests
             {
                 JsonSerializer.Deserialize<Envelope>(json, options);
             }
-            catch (JsonException exception)
+            catch (JsonException)
             {
-                throw exception;
+                throw;
             }
         });
     }
