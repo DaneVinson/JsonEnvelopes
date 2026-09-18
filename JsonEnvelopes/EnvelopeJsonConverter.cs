@@ -54,6 +54,12 @@ public class EnvelopeJsonConverter : JsonConverter<Envelope>
                 throw new JsonException($"The envelope JSON has no '{contentPropertyName}' property.");
             }
 
+            if (contentTypeElement.ValueKind != JsonValueKind.String &&
+                contentTypeElement.ValueKind != JsonValueKind.Null)
+            {
+                throw new JsonException($"The envelope JSON's '{contentTypePropertyName}' property is not a string.");
+            }
+
             var contentTypeName = contentTypeElement.GetString();
             if (string.IsNullOrEmpty(contentTypeName))
             {
@@ -71,6 +77,45 @@ public class EnvelopeJsonConverter : JsonConverter<Envelope>
         }
     }
 
+    private EnvelopeTypeRegistry RequireRegistry() =>
+        _registry ??
+        throw new InvalidOperationException(
+            $"This {nameof(EnvelopeJsonConverter)} has no {nameof(EnvelopeTypeRegistry)}. Build a " +
+            $"registry and add new {nameof(EnvelopeJsonConverter)}(registry) to " +
+            $"{nameof(JsonSerializerOptions)}.{nameof(JsonSerializerOptions.Converters)}.");
+
+    private static bool TryGetProperty(
+        JsonElement element,
+        string propertyName,
+        JsonSerializerOptions options,
+        out JsonElement value)
+    {
+        if (element.ValueKind != JsonValueKind.Object)
+        {
+            value = default;
+            return false;
+        }
+        if (element.TryGetProperty(propertyName, out value))
+        {
+            return true;
+        }
+        if (!options.PropertyNameCaseInsensitive)
+        {
+            return false;
+        }
+
+        foreach (var property in element.EnumerateObject())
+        {
+            if (string.Equals(property.Name, propertyName, StringComparison.OrdinalIgnoreCase))
+            {
+                value = property.Value;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /// <inheritdoc />
     /// <exception cref="InvalidOperationException">The content's type is not registered.</exception>
     public override void Write(Utf8JsonWriter writer, Envelope value, JsonSerializerOptions options)
@@ -86,39 +131,5 @@ public class EnvelopeJsonConverter : JsonConverter<Envelope>
         writer.WritePropertyName(options.GetContentPropertyName());
         JsonSerializer.Serialize(writer, content, options);
         writer.WriteEndObject();
-    }
-
-    private EnvelopeTypeRegistry RequireRegistry() =>
-        _registry ??
-        throw new InvalidOperationException(
-            $"This {nameof(EnvelopeJsonConverter)} has no {nameof(EnvelopeTypeRegistry)}. Build a " +
-            $"registry and add new {nameof(EnvelopeJsonConverter)}(registry) to " +
-            $"{nameof(JsonSerializerOptions)}.{nameof(JsonSerializerOptions.Converters)}.");
-
-    private static bool TryGetProperty(
-        JsonElement element,
-        string propertyName,
-        JsonSerializerOptions options,
-        out JsonElement value)
-    {
-        if (element.TryGetProperty(propertyName, out value))
-        {
-            return true;
-        }
-        if (!options.PropertyNameCaseInsensitive || element.ValueKind != JsonValueKind.Object)
-        {
-            return false;
-        }
-
-        foreach (var property in element.EnumerateObject())
-        {
-            if (string.Equals(property.Name, propertyName, StringComparison.OrdinalIgnoreCase))
-            {
-                value = property.Value;
-                return true;
-            }
-        }
-
-        return false;
     }
 }

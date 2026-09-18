@@ -78,4 +78,32 @@ public class SecurityTests
         Assert.Throws<InvalidOperationException>(() =>
             JsonSerializer.Serialize<Envelope>(envelope, options));
     }
+
+    [Fact]
+    public void Content_Type_Names_Are_Matched_Case_Sensitively_Even_When_Properties_Are_Case_Insensitive()
+    {
+        var registry = EnvelopeTypeRegistry.Create(builder => builder.Add<BarEntity>("Bar.v1"));
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        options.Converters.Add(new EnvelopeJsonConverter(registry));
+        var json = "{\"ContentType\":\"bar.V1\",\"Content\":{}}";
+
+        var exception = Assert.Throws<UnknownContentTypeException>(() =>
+            JsonSerializer.Deserialize<Envelope>(json, options));
+
+        Assert.Equal("bar.V1", exception.ContentTypeName);
+    }
+
+    [Fact]
+    public void A_Duplicate_ContentType_Property_Resolves_Through_The_Last_Occurrence()
+    {
+        var registry = EnvelopeTypeRegistry.Create(builder => builder.Add<BarEntity>("Foo.v1"));
+        var options = new JsonSerializerOptions();
+        options.Converters.Add(new EnvelopeJsonConverter(registry));
+        var json = "{\"ContentType\":\"Foo.v1\",\"ContentType\":\"Evil.v1\",\"Content\":{}}";
+
+        var exception = Assert.Throws<UnknownContentTypeException>(() =>
+            JsonSerializer.Deserialize<Envelope>(json, options));
+
+        Assert.Equal("Evil.v1", exception.ContentTypeName);
+    }
 }

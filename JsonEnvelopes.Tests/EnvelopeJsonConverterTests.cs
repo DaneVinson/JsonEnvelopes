@@ -62,6 +62,22 @@ public class EnvelopeJsonConverterTests
     }
 
     [Theory]
+    [InlineData("[1,2,3]")]
+    [InlineData("\"a string\"")]
+    public void Deserialization_Throws_JsonException_When_The_Root_Is_Not_An_Object(string json)
+    {
+        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Envelope>(json, NewOptions()));
+    }
+
+    [Fact]
+    public void Deserialization_Throws_JsonException_When_ContentType_Is_Not_A_String()
+    {
+        var json = "{\"ContentType\":123,\"Content\":{}}";
+
+        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Envelope>(json, NewOptions()));
+    }
+
+    [Theory]
     [InlineData(true, false)]
     [InlineData(false, false)]
     [InlineData(true, true)]

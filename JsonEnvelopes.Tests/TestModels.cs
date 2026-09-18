@@ -28,7 +28,14 @@ public class BarEntity
 
 public record TeleportCommand(string Destination, int Range);
 
+/// <summary>
+/// A content type whose payload is a collection, used to prove collections round-trip as envelope
+/// content.
+/// </summary>
 public class BarList
 {
+    /// <summary>
+    /// The wrapped entities.
+    /// </summary>
     public List<BarEntity> Bars { get; set; } = new();
 }
