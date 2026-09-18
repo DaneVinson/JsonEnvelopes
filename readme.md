@@ -76,6 +76,7 @@ by 2.x cannot be read by 3.0.0, so drain any queue before upgrading.
 | `Envelope<T>` required `T` to have a parameterless constructor | Any reference type, including positional records |
 | `new Envelope<T>()` | Removed; use `new Envelope<T>(content)` |
 | An unknown type threw `TypeLoadException` | An unregistered name throws `UnknownContentTypeException` |
+| Serializing the concrete `Envelope<T>` worked the same as serializing `Envelope` | `ContentType` is now a `Type`, which System.Text.Json refuses to serialize by reflection; serializing `Envelope<T>` by its own type now throws `NotSupportedException` instead of silently producing different output. Always call `JsonSerializer.Serialize<Envelope>(envelope, options)` so the converter runs |
 
 Call sites that relied on `Type.GetType(envelope.ContentType)` simplify to `envelope.ContentType`.
 

@@ -92,6 +92,24 @@ public class EnvelopeTypeRegistryTests
     }
 
     [Fact]
+    public void Add_Throws_ArgumentException_When_Type_Is_Abstract()
+    {
+        var exception = Assert.Throws<ArgumentException>(() => EnvelopeTypeRegistry.Create(builder =>
+            builder.Add<AbstractCommand>("Abstract.v1")));
+
+        Assert.Contains("AbstractCommand", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Add_Throws_ArgumentException_When_Type_Is_An_Interface()
+    {
+        var exception = Assert.Throws<ArgumentException>(() => EnvelopeTypeRegistry.Create(builder =>
+            builder.Add<ICommand>("Command.v1")));
+
+        Assert.Contains("ICommand", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Add_Throws_ArgumentException_When_Name_Is_Already_Registered()
     {
         var exception = Assert.Throws<ArgumentException>(() => EnvelopeTypeRegistry.Create(builder =>

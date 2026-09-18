@@ -20,14 +20,23 @@ public sealed class EnvelopeTypeRegistryBuilder
     /// <paramref name="name"/>. Names are opaque strings; this library never parses them.
     /// </summary>
     /// <exception cref="ArgumentException">
-    /// <paramref name="name"/> is null, empty, or whitespace; or <paramref name="name"/> or
-    /// <typeparamref name="TContent"/> is already registered.
+    /// <paramref name="name"/> is null, empty, or whitespace; <typeparamref name="TContent"/> is an
+    /// abstract class or an interface; or <paramref name="name"/> or <typeparamref name="TContent"/>
+    /// is already registered.
     /// </exception>
     public EnvelopeTypeRegistryBuilder Add<TContent>(string name) where TContent : class
     {
         if (string.IsNullOrWhiteSpace(name))
         {
             throw new ArgumentException("A logical content type name is required.", nameof(name));
+        }
+        if (typeof(TContent).IsAbstract || typeof(TContent).IsInterface)
+        {
+            throw new ArgumentException(
+                $"The content type {typeof(TContent)} cannot be registered because it is " +
+                $"{(typeof(TContent).IsInterface ? "an interface" : "an abstract class")}. Register a " +
+                "concrete type instead.",
+                nameof(name));
         }
         if (_registrationsByName.ContainsKey(name))
         {

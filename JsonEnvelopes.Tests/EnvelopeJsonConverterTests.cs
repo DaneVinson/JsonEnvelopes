@@ -139,6 +139,24 @@ public class EnvelopeJsonConverterTests
     }
 
     [Fact]
+    public void Write_Serializes_Against_The_Declared_Type_Not_The_Runtime_Type()
+    {
+        var registry = EnvelopeTypeRegistry.Create(builder => builder.Add<BaseCommand>("Base.v1"));
+        var options = new JsonSerializerOptions();
+        options.Converters.Add(new EnvelopeJsonConverter(registry));
+        var derived = new DerivedCommand { Id = "base-id", Detail = "derived-detail" };
+        var envelope = new Envelope<BaseCommand>(derived);
+
+        var json = JsonSerializer.Serialize<Envelope>(envelope, options);
+        var result = JsonSerializer.Deserialize<Envelope>(json, options);
+
+        Assert.Contains("\"Id\":\"base-id\"", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("Detail", json, StringComparison.Ordinal);
+        Assert.IsType<Envelope<BaseCommand>>(result);
+        Assert.IsType<BaseCommand>(result!.GetContent());
+    }
+
+    [Fact]
     public void One_Registry_Serves_Concurrent_Deserialization()
     {
         var options = NewOptions();

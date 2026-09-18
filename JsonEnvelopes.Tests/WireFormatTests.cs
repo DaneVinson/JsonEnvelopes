@@ -45,6 +45,30 @@ public class WireFormatTests
     }
 
     [Fact]
+    public void Default_Options_Read_The_Golden_Pascal_Case_Json()
+    {
+        var json = "{\"ContentType\":\"Bar.v1\",\"Content\":{\"Id\":\"bar1\"}}";
+
+        var result = JsonSerializer.Deserialize<Envelope>(json, NewOptions());
+
+        var envelope = Assert.IsType<Envelope<BarEntity>>(result);
+        Assert.Equal("bar1", envelope.Content.Id);
+    }
+
+    [Fact]
+    public void CamelCase_Policy_Reads_The_Golden_CamelCase_Json_But_Keeps_The_Registered_Name()
+    {
+        // A naming policy affects property names, never the registered content type name: the
+        // name stays "Bar.v1" in the JSON below even though the property names are camelCase.
+        var json = "{\"contentType\":\"Bar.v1\",\"content\":{\"id\":\"bar1\"}}";
+
+        var result = JsonSerializer.Deserialize<Envelope>(json, NewOptions(JsonNamingPolicy.CamelCase));
+
+        var envelope = Assert.IsType<Envelope<BarEntity>>(result);
+        Assert.Equal("bar1", envelope.Content.Id);
+    }
+
+    [Fact]
     public void Serializing_By_The_Static_Envelope_Of_T_Type_Bypasses_The_Converter_And_Throws()
     {
         // The [JsonConverter] attribute on the abstract Envelope base does not apply when the

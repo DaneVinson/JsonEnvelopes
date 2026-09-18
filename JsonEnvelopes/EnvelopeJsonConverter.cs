@@ -129,7 +129,7 @@ public class EnvelopeJsonConverter : JsonConverter<Envelope>
         writer.WriteStartObject();
         writer.WriteString(options.GetContentTypePropertyName(), registry.GetName(value.ContentType));
         writer.WritePropertyName(options.GetContentPropertyName());
-        JsonSerializer.Serialize(writer, content, options);
+        JsonSerializer.Serialize(writer, content, value.ContentType, options);
         writer.WriteEndObject();
     }
 }
