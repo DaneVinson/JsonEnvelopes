@@ -334,3 +334,14 @@ ASALocalRun/
 # Code coverage (coverlet)
 coverage.cobertura.xml
 CodeCoverage/
+
+# Claude Code
+# Shared config (.claude/settings.json, .claude/commands/, .claude/agents/,
+# .claude/skills/ and CLAUDE.md) is intentionally NOT ignored.
+.claude/settings.local.json
+.claude/*.local.json
+.claude/scratchpad/
+.claude/todos/
+.claude/shell-snapshots/
+.claude/statsig/
+CLAUDE.local.md
