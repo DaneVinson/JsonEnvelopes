@@ -1,9 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <!--Match value in JsonEnvelopes.nuspec and readme.md-->
     <AssemblyVersion>3.0.0</AssemblyVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!--Match the version declared in JsonEnvelopes.nuspec-->
+    <PackageReference Include="System.Text.Json" Version="6.0.10" />
+  </ItemGroup>
 
 </Project>

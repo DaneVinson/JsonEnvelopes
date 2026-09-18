@@ -20,8 +20,8 @@ changed our minds* — the things neither of the other two carries.
 | Version in the tree | **3.0.0**, a breaking change, **unpublished** |
 | Library code | 7 files. `Envelope`, `Envelope<TContent>`, `EnvelopeJsonConverter`, `EnvelopeTypeRegistry`, `EnvelopeTypeRegistryBuilder`, `UnknownContentTypeException`, `Extensions` |
 | Tests | **53 passing** as of 2026-09-18, up from 12 |
-| Target framework | **`net6.0`, out of support since November 2024** — build emits `NETSDK1138` |
-| Review backlog | 15 findings from 2026-09-17; **8 closed by 3.0.0**, 7 open. See Section 5 |
+| Target framework | library is **`netstandard2.0`**; tests and example remain `net6.0` and still emit `NETSDK1138` |
+| Review backlog | 15 findings from 2026-09-17; **8 closed by 3.0.0**, finding 3 partly closed, 6 open. See Section 5 |
 | Docs | `readme.md` rewritten for 3.0.0 with a migration guide; `CLAUDE.md`, this file, and the `wrap-up` skill added 2026-09-17 |
 
 ## 2. Repo state
@@ -113,6 +113,14 @@ that branch happened to touch. The skill maintains this file; it does not define
   `--skip-duplicate`, so it **fails the pipeline** when the version is unchanged and
   **publishes irreversibly** when it is changed. Releasing is a deliberate act, never
   a side effect of landing work.
+- **The `System.Text.Json` version lives in two places.** `<PackageReference>` in
+  `JsonEnvelopes/JsonEnvelopes.csproj` and `<dependency>` in `JsonEnvelopes.nuspec`.
+  A comment in each points at the other. If they drift, the package declares a floor
+  it was not built against.
+- **The `.nuspec` dependency group is not generated.** It is hand-written, so a new
+  `<PackageReference>` in the csproj does NOT reach consumers unless it is added to the
+  nuspec by hand. Before 2026-09-18 the group was empty, which was harmless only
+  because the library had no dependencies.
 - **The package version lives in four places across three files.** `<AssemblyVersion>`
   in `JsonEnvelopes/JsonEnvelopes.csproj`, `<version>` in `JsonEnvelopes.nuspec`, and
   twice in `readme.md` (the prose version and the `dotnet add package` line). They
@@ -178,9 +186,19 @@ couples two services through a .NET implementation detail — the opposite of th
 "agnostic with respect to message type" goal stated in the readme. **Fix:** the
 registered-logical-name resolver above, plus a schema-version field.
 
-**3. `net6.0` is out of support.** Out of support since November 2024; the build
-emits `NETSDK1138`. There is no `netstandard2.0` target, so .NET Framework consumers
-cannot use the package at all. **Fix:** multi-target `net8.0;net10.0;netstandard2.0`.
+**3. Target framework — partly closed 2026-09-18.** The library now single-targets
+`netstandard2.0` with a `System.Text.Json` 6.0.10 floor, so .NET Framework 4.6.1+ and
+.NET Core 2.0+ consumers are reachable and the library itself no longer emits
+`NETSDK1138`. Verified: all 53 tests pass against the `netstandard2.0` build and the
+assembly is still strong-named.
+
+**Still open.** The 6.0.x branch of `System.Text.Json` is out of support, so the
+declared floor can never be patched — if a new advisory lands against 6.0.10 there
+will be no 6.0.12, and the fix would be to raise the floor. Only the 10.x branch is
+under active servicing. Multi-targeting `netstandard2.0;net10.0` would keep the broad
+reach while letting modern consumers use the in-box serializer with no package
+dependency and no transitive tree, and would unblock `FrozenDictionary` in the
+registry. `JsonEnvelopes.Tests` and `JsonEnvelopes.Example` still target `net6.0`.
 
 **4. ~~`PropertyNameCaseInsensitive` is silently ignored~~ — CLOSED in 3.0.0.**
 *Evidence: `Extensions` now calls `PropertyNamingPolicy.ConvertName`, and `Read` falls back to an ordinal-ignore-case scan when the option is set. Cross-configuration round-trip tests cover it.*
@@ -287,7 +305,8 @@ local `using` directives. A CHANGELOG matters more now that a breaking version e
 
 | | Decision |
 | --- | --- |
-| Target framework | **`net6.0`** — out of support; see finding 3 |
+| Target framework | library **`netstandard2.0`**; tests and example **`net6.0`** — see finding 3 |
+| Serializer dependency | **`System.Text.Json` 6.0.10** — the lowest version that both compiles and carries no advisory; see finding 3 |
 | Language version | **C# 10**, pinned in `Directory.Build.props` as `<LangVersion>10.0</LangVersion>` |
 | Nullable / ImplicitUsings | **enabled** in `Directory.Build.props`, never per-project |
 | Local SDK | 10.0.401 is the only SDK installed; it builds `net6.0` fine but warns `NETSDK1138` |
@@ -303,6 +322,18 @@ local `using` directives. A CHANGELOG matters more now that a breaking version e
 Each cost time on 2026-09-17. Recorded as the trap, its symptom, and the check that
 catches it next time.
 
+- **Relying on BCL nullability annotations that netstandard2.0 does not have.**
+  Symptom: retargeting to `netstandard2.0` produced `CS8604` on a line that had been
+  clean for years, because `string.IsNullOrEmpty` carries `[NotNullWhen(false)]` only in
+  the annotated .NET 6 reference assemblies — the netstandard2.0 ones carry no
+  nullability annotations at all, so the compiler cannot narrow through the call. Check:
+  build the library and read the warnings; write the narrowing explicitly
+  (`x is null || x.Length == 0`) rather than suppressing with `!`.
+- **A hand-written .nuspec whose dependency group is empty.** Symptom: none at build or
+  test time. The package ships an assembly whose dependency is undeclared, and the
+  consumer fails at runtime on first use. Check: after adding any `<PackageReference>`,
+  confirm it also appears in `JsonEnvelopes.nuspec`, and compare against what
+  `dotnet pack` generates for the same project.
 - **Appending LF lines to a CRLF file.** Symptom: git reports
   `LF will be replaced by CRLF the next time Git touches it`, and a later normalization
   shows the whole file as changed. Check: after writing, confirm

@@ -9,6 +9,11 @@ Install the [`JsonEnvelopes` NuGet Package](https://www.nuget.org/packages/JsonE
 
     dotnet add package JsonEnvelopes --version 3.0.0
 
+The package targets **.NET Standard 2.0**, so it runs on .NET Core 2.0+, .NET 5+, and
+.NET Framework 4.6.1+. It depends on `System.Text.Json` 6.0.10 or later. On .NET 6 and
+newer that dependency is already part of the shared framework; on .NET Framework it
+arrives as a package along with its own transitive dependencies.
+
 ## Usage
 
 Register every type you are willing to receive, then add a converter built from that registry to
