@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-09-18
 **Phase:** 3.0.0 is built, tested and merged to local `main`, but **not published**.
-Version 2.0.1 remains the latest on nuget.org.
+It targets `netstandard2.0`. Version 2.0.1 remains the latest on nuget.org.
 
 Companion to [readme.md](readme.md) and [CLAUDE.md](CLAUDE.md). The readme records
 *how to use the package*. CLAUDE.md records *the conventions to write code by*.
@@ -15,7 +15,7 @@ changed our minds* — the things neither of the other two carries.
 
 | | |
 | --- | --- |
-| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) `origin/main` is at the .gitignore commit `0d2816c`, and local `main` is **1 commit ahead** (the documentation commit, unpushed) |
+| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) `origin/main` is still at `95c6d62`, the last documentation commit before the 3.0.0 work. Local `main` carries all of 3.0.0 and the `netstandard2.0` retarget, **unpushed**. Run `git rev-list --count origin/main..main` for the current figure rather than trusting a number written here |
 | Published package | **2.0.1** on nuget.org, `net6.0` only — unchanged |
 | Version in the tree | **3.0.0**, a breaking change, **unpublished** |
 | Library code | 7 files. `Envelope`, `Envelope<TContent>`, `EnvelopeJsonConverter`, `EnvelopeTypeRegistry`, `EnvelopeTypeRegistryBuilder`, `UnknownContentTypeException`, `Extensions` |
