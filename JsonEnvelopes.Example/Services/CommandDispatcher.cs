@@ -1,29 +1,32 @@
-﻿using JsonEnvelopes.Example.Handlers;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿namespace JsonEnvelopes.Example.Services;
 
-namespace JsonEnvelopes.Example.Services
+/// <summary>
+/// Resolves an <see cref="ICommandHandler{TCommand}"/> for an envelope's content type and hands the
+/// content to it.
+/// </summary>
+public class CommandDispatcher
 {
-    public class CommandDispatcher
+    private readonly IServiceProvider _serviceProvider;
+
+    /// <summary>
+    /// Create a dispatcher backed by <paramref name="serviceProvider"/>.
+    /// </summary>
+    public CommandDispatcher(IServiceProvider serviceProvider) =>
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+
+    /// <summary>
+    /// Dispatch the content of <paramref name="commandEnvelope"/> to its handler.
+    /// </summary>
+    public async Task DispatchAsync(Envelope commandEnvelope)
     {
-        private readonly IServiceProvider _serviceProvider;
+        ArgumentNullException.ThrowIfNull(commandEnvelope);
 
-        public CommandDispatcher(IServiceProvider serviceProvider)
+        var handlerType = typeof(ICommandHandler<>).MakeGenericType(commandEnvelope.ContentType);
+        if (_serviceProvider.GetService(handlerType) is not ICommandHandler handler)
         {
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            throw new InvalidOperationException($"No {nameof(ICommandHandler)} is registered for {handlerType}.");
         }
 
-        public async Task DispatchAsync(Envelope commandEnvelope)
-        {
-            var handlerType = typeof(ICommandHandler<>).MakeGenericType(Type.GetType(commandEnvelope.ContentType)!);
-            ICommandHandler? handler = _serviceProvider.GetService(handlerType) as ICommandHandler;
-            if (handler == null) { throw new InvalidOperationException($"{nameof(handler)} is not {nameof(ICommandHandler)}"); }
-
-            await handler.HandleAsync(commandEnvelope.GetContent());
-        }
+        await handler.HandleAsync(commandEnvelope.GetContent());
     }
 }

@@ -3,21 +3,29 @@
 /// <summary>
 /// Concrete implementation of <see cref="Envelope"/> with generic Content.
 /// </summary>
-public class Envelope<TContent> : Envelope where TContent : class, new()
+public class Envelope<TContent> : Envelope where TContent : class
 {
-    public Envelope() : base()
-    { }
+    /// <summary>
+    /// Wrap <paramref name="content"/>.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"><paramref name="content"/> is null.</exception>
+    public Envelope(TContent content)
+    {
+        ArgumentNullException.ThrowIfNull(content);
 
-    public Envelope(TContent content) =>
-        Content = content ?? new TContent();
+        Content = content;
+    }
 
+    /// <summary>
+    /// The wrapped content. Assigned at construction and never afterward.
+    /// </summary>
+    public TContent Content { get; }
 
+    /// <inheritdoc />
+    public override Type ContentType =>
+        typeof(TContent);
+
+    /// <inheritdoc />
     public override object GetContent() =>
         Content;
-
-
-    public TContent Content { get; set; } = new TContent();
-
-    public override string ContentType =>
-        typeof(TContent).AssemblyQualifiedName ?? string.Empty;
 }

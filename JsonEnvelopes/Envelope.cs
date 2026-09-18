@@ -7,14 +7,13 @@
 public abstract class Envelope
 {
     /// <summary>
-    /// Wrap any content in an <see cref="Envelope{TContent}"/> and return as an <see cref="Envelope"/>.
+    /// The CLR type of the wrapped content. To obtain the logical name this type carries on the
+    /// wire, call <see cref="EnvelopeTypeRegistry.GetName"/>.
     /// </summary>
-    public static Envelope WrapContent(object content) =>
-        (Activator.CreateInstance(
-                        typeof(Envelope<>).MakeGenericType(content.GetType()),
-                        content) as Envelope)!;
+    public abstract Type ContentType { get; }
 
+    /// <summary>
+    /// The wrapped content.
+    /// </summary>
     public abstract object GetContent();
-
-    public abstract string ContentType { get; }
 }

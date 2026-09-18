@@ -345,3 +345,6 @@ CodeCoverage/
 .claude/shell-snapshots/
 .claude/statsig/
 CLAUDE.local.md
+
+# Superpowers subagent-driven-development scratch
+.superpowers/

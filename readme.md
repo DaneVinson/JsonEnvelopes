@@ -5,32 +5,80 @@ Standardized messaging with System.Text.Json serialization.
 Preform serialization/deserialization of messages such that receiving services can be agnostic with respect to message type.
 
 ## Get started
-Install the [`JsonEnvelopes` NuGet Package](https://www.nuget.org/packages/JsonEnvelopes/) (e.g. version 2.0.1).
+Install the [`JsonEnvelopes` NuGet Package](https://www.nuget.org/packages/JsonEnvelopes/) (e.g. version 3.0.0).
 
-    dotnet add package JsonEnvelopes --version 2.0.1
+    dotnet add package JsonEnvelopes --version 3.0.0
 
 ## Usage
-Any class with a default constructor can be wrapped with `Envelope<T>`, e.g. the command `CastFireball`.
 
-    var command = new CastFireball();
-    var envelope = new Envelope<CastFireball>(command);
+Register every type you are willing to receive, then add a converter built from that registry to
+your `JsonSerializerOptions`.
 
-Serialize the envelope by calling `JsonSerializer.Serialize<Envelope>` (`System.Text.Json` namespace) and passing it an `Envelope<T>` instance. Note that the generic argument passed to `Serialize` is of type `Envelope` not of type `Envelope<T>`. This triggers the use of `EnvelopeJsonConverter`'s customized serialization operations (i.e. Read/Write);
+    var registry = EnvelopeTypeRegistry.Create(builder => builder
+        .Add<CastFireball>("CastFireball.v1")
+        .Add<CreateCharacter>("CreateCharacter.v1"));
 
-    var json = JsonSerializer.Serialize<Envelope>(envelope);
+    var jsonOptions = new JsonSerializerOptions();
+    jsonOptions.Converters.Add(new EnvelopeJsonConverter(registry));
 
-Deserialize json for an `Envelope` by calling `JsonSerializer.Deserialize<Envelope>`. Again note the generic argument is of type `Envelope` which engages `EnvelopeJsonConverter`.
+The logical name you pass to `Add` is what travels on the wire. It is an opaque string; this
+library never parses it. The `.v1` suffix above is a suggestion, not a requirement.
 
-    var receivedEnvelope = JsonSerializer.Deserialize<Envelope>(json);
+Wrap content whose type you know at compile time with `Envelope<T>`, or let the registry pick the
+type at run time with `Wrap`.
 
-The envelope's `ContentType` provides the `AssemblyQualifiedName` string of the content's type (e.g. "JsonEnvelopes.Example.Commands.CastFireball, JsonEnvelopes.Example, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null").
+    var envelope = new Envelope<CastFireball>(new CastFireball());
+    var alsoAnEnvelope = registry.Wrap(someCommand);
 
-    var assemblyQualifiedName = receivedEnvelope.ContentType;
+Serialize by calling `JsonSerializer.Serialize<Envelope>` with your options. Note that the generic
+argument is `Envelope`, not `Envelope<T>` — that is what engages `EnvelopeJsonConverter`.
 
-The envelope's `GetContent` method returns an `object` which is of the type provided by the `ContentType` property. Continuing the example the variable `success` will be true in the following.
+    var json = JsonSerializer.Serialize<Envelope>(envelope, jsonOptions);
 
-    var contentType = receivedEnvelope.GetContent().GetType();
-    var success = contentType == typeof(CastFireball);
+The result carries the logical name, not a .NET type name:
+
+    {"ContentType":"CastFireball.v1","Content":{ ... }}
+
+Deserialize the same way.
+
+    var receivedEnvelope = JsonSerializer.Deserialize<Envelope>(json, jsonOptions);
+
+`ContentType` gives you the content's CLR type, ready for handler lookup.
+
+    var contentType = receivedEnvelope.ContentType;   // typeof(CastFireball)
+    var content = receivedEnvelope.GetContent();      // the CastFireball instance
+
+### Unregistered types are refused
+
+A name that is not in the registry throws `UnknownContentTypeException`, which derives from
+`JsonException`. The library never resolves a type name supplied by the sender, so a message cannot
+choose which type your process loads. Catch the narrow type to dead-letter an unrecognized message:
+
+    try
+    {
+        var received = JsonSerializer.Deserialize<Envelope>(json, jsonOptions);
+    }
+    catch (UnknownContentTypeException exception)
+    {
+        DeadLetter(json, exception.ContentTypeName);
+    }
+
+## Migrating from 2.x
+
+Version 3.0.0 is a breaking change and its wire format is not compatible with 2.x. Messages written
+by 2.x cannot be read by 3.0.0, so drain any queue before upgrading.
+
+| 2.x | 3.0.0 |
+| --- | --- |
+| No setup; the converter resolved any type name | Build an `EnvelopeTypeRegistry` and add `new EnvelopeJsonConverter(registry)` to your options |
+| `ContentType` was a `string` holding an `AssemblyQualifiedName` | `ContentType` is a `Type`; the wire carries your logical name |
+| `Envelope.WrapContent(content)` | `registry.Wrap(content)` |
+| `Envelope<T>` required `T` to have a parameterless constructor | Any reference type, including positional records |
+| `new Envelope<T>()` | Removed; use `new Envelope<T>(content)` |
+| An unknown type threw `TypeLoadException` | An unregistered name throws `UnknownContentTypeException` |
+| Serializing the concrete `Envelope<T>` worked the same as serializing `Envelope` | `ContentType` is now a `Type`, which System.Text.Json refuses to serialize by reflection; serializing `Envelope<T>` by its own type now throws `NotSupportedException` instead of silently producing different output. Always call `JsonSerializer.Serialize<Envelope>(envelope, options)` so the converter runs |
+
+Call sites that relied on `Type.GetType(envelope.ContentType)` simplify to `envelope.ContentType`.
 
 ## Examples
 See the project `JsonEnvelopes.Example` for examples of JsonEnvelopes message handling with Dependency Injection and additionally with [MediatR](https://github.com/jbogard/MediatR).

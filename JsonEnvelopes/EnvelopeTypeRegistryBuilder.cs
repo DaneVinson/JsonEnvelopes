@@ -1,0 +1,67 @@
+namespace JsonEnvelopes;
+
+/// <summary>
+/// Collects registrations for an <see cref="EnvelopeTypeRegistry"/>. Obtained inside the callback
+/// passed to <see cref="EnvelopeTypeRegistry.Create"/>.
+/// </summary>
+public sealed class EnvelopeTypeRegistryBuilder
+{
+    private readonly Dictionary<Type, string> _namesByType = new();
+    private readonly Dictionary<string, EnvelopeRegistration> _registrationsByName = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Create an empty builder. Obtained only via <see cref="EnvelopeTypeRegistry.Create"/>.
+    /// </summary>
+    internal EnvelopeTypeRegistryBuilder()
+    { }
+
+    /// <summary>
+    /// Allow <typeparamref name="TContent"/> as envelope content, carried on the wire as
+    /// <paramref name="name"/>. Names are opaque strings; this library never parses them.
+    /// </summary>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="name"/> is null, empty, or whitespace; <typeparamref name="TContent"/> is an
+    /// abstract class or an interface; or <paramref name="name"/> or <typeparamref name="TContent"/>
+    /// is already registered.
+    /// </exception>
+    public EnvelopeTypeRegistryBuilder Add<TContent>(string name) where TContent : class
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("A logical content type name is required.", nameof(name));
+        }
+        if (typeof(TContent).IsAbstract || typeof(TContent).IsInterface)
+        {
+            throw new ArgumentException(
+                $"The content type {typeof(TContent)} cannot be registered because it is " +
+                $"{(typeof(TContent).IsInterface ? "an interface" : "an abstract class")}. Register a " +
+                "concrete type instead.",
+                nameof(name));
+        }
+        if (_registrationsByName.ContainsKey(name))
+        {
+            throw new ArgumentException($"The name '{name}' is already registered.", nameof(name));
+        }
+        if (_namesByType.TryGetValue(typeof(TContent), out var existingName))
+        {
+            throw new ArgumentException(
+                $"The content type {typeof(TContent)} is already registered as '{existingName}'.",
+                nameof(name));
+        }
+
+        _registrationsByName.Add(
+            name,
+            new EnvelopeRegistration(typeof(TContent), content => new Envelope<TContent>((TContent)content)));
+        _namesByType.Add(typeof(TContent), name);
+        return this;
+    }
+
+    /// <summary>
+    /// Produce an immutable registry over copies of the collected registrations, so later mutation
+    /// of this builder cannot affect the returned registry.
+    /// </summary>
+    internal EnvelopeTypeRegistry Build() =>
+        new(
+            new Dictionary<string, EnvelopeRegistration>(_registrationsByName, StringComparer.Ordinal),
+            new Dictionary<Type, string>(_namesByType));
+}
