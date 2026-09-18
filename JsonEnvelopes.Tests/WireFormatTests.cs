@@ -44,6 +44,22 @@ public class WireFormatTests
         Assert.Equal("{\"CONTENTTYPE\":\"Bar.v1\",\"CONTENT\":{\"ID\":\"bar1\"}}", json);
     }
 
+    [Fact]
+    public void Serializing_By_The_Static_Envelope_Of_T_Type_Bypasses_The_Converter_And_Throws()
+    {
+        // The [JsonConverter] attribute on the abstract Envelope base does not apply when the
+        // compile-time static type passed to Serialize is the derived Envelope<TContent>, so
+        // System.Text.Json falls back to reflecting over Envelope<TContent> itself. That
+        // reflection hits the ContentType property, whose type is System.Type - a type
+        // System.Text.Json refuses to serialize. The resulting NotSupportedException is a loud,
+        // deliberate guard rail: consumers must serialize through the Envelope base type (for
+        // example JsonSerializer.Serialize<Envelope>(envelope, options)) for the converter, and
+        // therefore the allow-list, to run at all.
+        Envelope<BarEntity> envelope = new Envelope<BarEntity>(new BarEntity("bar1"));
+
+        Assert.Throws<NotSupportedException>(() => JsonSerializer.Serialize(envelope, NewOptions()));
+    }
+
     private sealed class UpperCasePolicy : JsonNamingPolicy
     {
         public override string ConvertName(string name) =>

@@ -22,8 +22,8 @@ public class Envelope<TContent> : Envelope where TContent : class
     public TContent Content { get; }
 
     /// <inheritdoc />
-    public override string ContentType =>
-        typeof(TContent).AssemblyQualifiedName ?? string.Empty;
+    public override Type ContentType =>
+        typeof(TContent);
 
     /// <inheritdoc />
     public override object GetContent() =>
