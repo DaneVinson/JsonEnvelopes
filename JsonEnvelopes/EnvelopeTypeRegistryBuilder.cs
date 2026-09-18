@@ -9,6 +9,9 @@ public sealed class EnvelopeTypeRegistryBuilder
     private readonly Dictionary<Type, string> _namesByType = new();
     private readonly Dictionary<string, EnvelopeRegistration> _registrationsByName = new(StringComparer.Ordinal);
 
+    /// <summary>
+    /// Create an empty builder. Obtained only via <see cref="EnvelopeTypeRegistry.Create"/>.
+    /// </summary>
     internal EnvelopeTypeRegistryBuilder()
     { }
 
@@ -44,6 +47,12 @@ public sealed class EnvelopeTypeRegistryBuilder
         return this;
     }
 
+    /// <summary>
+    /// Produce an immutable registry over copies of the collected registrations, so later mutation
+    /// of this builder cannot affect the returned registry.
+    /// </summary>
     internal EnvelopeTypeRegistry Build() =>
-        new(_registrationsByName, _namesByType);
+        new(
+            new Dictionary<string, EnvelopeRegistration>(_registrationsByName, StringComparer.Ordinal),
+            new Dictionary<Type, string>(_namesByType));
 }

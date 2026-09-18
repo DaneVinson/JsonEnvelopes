@@ -6,9 +6,14 @@ namespace JsonEnvelopes;
 /// </summary>
 public sealed class EnvelopeTypeRegistry
 {
-    private readonly Dictionary<string, EnvelopeRegistration> _registrationsByName;
     private readonly Dictionary<Type, string> _namesByType;
+    private readonly Dictionary<string, EnvelopeRegistration> _registrationsByName;
 
+    /// <summary>
+    /// Create a registry that owns the given lookup dictionaries. Callers must not retain or
+    /// mutate <paramref name="registrationsByName"/> or <paramref name="namesByType"/> after
+    /// passing them in.
+    /// </summary>
     internal EnvelopeTypeRegistry(
         Dictionary<string, EnvelopeRegistration> registrationsByName,
         Dictionary<Type, string> namesByType) =>
@@ -59,6 +64,13 @@ public sealed class EnvelopeTypeRegistry
     }
 
     /// <summary>
+    /// Return the registration stored under <paramref name="name"/> without throwing when it is
+    /// absent. Used internally when resolving content types from their wire name.
+    /// </summary>
+    internal bool TryGetRegistration(string name, out EnvelopeRegistration? registration) =>
+        _registrationsByName.TryGetValue(name, out registration);
+
+    /// <summary>
     /// Wrap <paramref name="content"/> in an <see cref="Envelope{TContent}"/> for its runtime type.
     /// </summary>
     /// <exception cref="ArgumentNullException"><paramref name="content"/> is null.</exception>
@@ -70,9 +82,6 @@ public sealed class EnvelopeTypeRegistry
         var name = GetName(content.GetType());
         return _registrationsByName[name].Factory(content);
     }
-
-    internal bool TryGetRegistration(string name, out EnvelopeRegistration? registration) =>
-        _registrationsByName.TryGetValue(name, out registration);
 }
 
 /// <summary>
@@ -81,10 +90,21 @@ public sealed class EnvelopeTypeRegistry
 /// </summary>
 internal sealed class EnvelopeRegistration
 {
+    /// <summary>
+    /// Create a registration pairing <paramref name="contentType"/> with the <paramref name="factory"/>
+    /// that wraps an instance of it.
+    /// </summary>
     internal EnvelopeRegistration(Type contentType, Func<object, Envelope> factory) =>
         (ContentType, Factory) = (contentType, factory);
 
+    /// <summary>
+    /// The registered content type.
+    /// </summary>
     internal Type ContentType { get; }
 
+    /// <summary>
+    /// Wraps an instance of <see cref="ContentType"/> in its <see cref="Envelope{TContent}"/>
+    /// without reflection.
+    /// </summary>
     internal Func<object, Envelope> Factory { get; }
 }

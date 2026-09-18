@@ -123,4 +123,20 @@ public class EnvelopeTypeRegistryTests
         Assert.Equal("Bar.v1", registry.GetName(typeof(BarEntity)));
         Assert.Equal("Foo.v1", registry.GetName(typeof(FooCommand<BarEntity>)));
     }
+
+    [Fact]
+    public void Registry_Is_Unaffected_By_Later_Mutation_Of_The_Captured_Builder()
+    {
+        EnvelopeTypeRegistryBuilder? capturedBuilder = null;
+        var registry = EnvelopeTypeRegistry.Create(builder =>
+        {
+            capturedBuilder = builder;
+            builder.Add<BarEntity>("Bar.v1");
+        });
+
+        capturedBuilder!.Add<FooCommand<BarEntity>>("Foo.v1");
+
+        Assert.False(registry.TryGetName(typeof(FooCommand<BarEntity>), out var name));
+        Assert.Null(name);
+    }
 }
