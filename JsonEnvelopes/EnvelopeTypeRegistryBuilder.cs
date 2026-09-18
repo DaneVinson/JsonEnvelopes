@@ -23,7 +23,7 @@ public sealed class EnvelopeTypeRegistryBuilder
     /// <paramref name="name"/> is null, empty, or whitespace; or <paramref name="name"/> or
     /// <typeparamref name="TContent"/> is already registered.
     /// </exception>
-    public EnvelopeTypeRegistryBuilder Add<TContent>(string name) where TContent : class, new()
+    public EnvelopeTypeRegistryBuilder Add<TContent>(string name) where TContent : class
     {
         if (string.IsNullOrWhiteSpace(name))
         {

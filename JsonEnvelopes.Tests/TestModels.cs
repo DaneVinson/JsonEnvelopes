@@ -25,3 +25,5 @@ public class BarEntity
 
     public string Id { get; set; } = string.Empty;
 }
+
+public record TeleportCommand(string Destination, int Range);
