@@ -15,7 +15,7 @@ changed our minds* — the things neither of the other two carries.
 
 | | |
 | --- | --- |
-| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) remote exists, but local `main` is **ahead of `origin/main`** (unpushed) |
+| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) `origin/main` is at the .gitignore commit `0d2816c`, and local `main` is **1 commit ahead** (the documentation commit, unpushed) |
 | Published package | **2.0.1** on nuget.org, `net6.0` only |
 | Library code | complete and stable; 4 files, ~120 lines |
 | Tests | **12 passing** in Release as of 2026-09-17 |
@@ -35,9 +35,11 @@ Three projects in `JsonEnvelopes.sln`:
 - **`JsonEnvelopes.Example/`** — console app demonstrating dispatch through both
   MediatR and a hand-rolled `CommandDispatcher`. Not packable.
 
-Local `main` is ahead of `origin/main` by unpushed documentation commits. Nothing
-has been pushed since the review of 2026-09-17. **Pushing `main` publishes to
-nuget.org** — see Section 4.
+Local `main` is 1 commit ahead of `origin/main`. The `.gitignore` commit `0d2816c`
+was pushed on 2026-09-17 from outside the session that wrote it; version 2.0.1 was
+unchanged, so the pipeline's `nuget push` step is expected to have failed on a
+duplicate — see finding 11. **Pushing `main` publishes to nuget.org** — see
+Section 4.
 
 No git tags exist, so published version 2.0.1 cannot be mapped to a commit.
 
