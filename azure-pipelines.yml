@@ -18,13 +18,6 @@ jobs:
         packageType: 'sdk'
         version: 10.x
 
-    # The tests and the example still target net6.0 (status.md finding 3), and SDK 10 does not include that runtime
-    - task: UseDotNet@2
-      displayName: Install .NET 6 runtime
-      inputs:
-        packageType: 'runtime'
-        version: 6.x
-
     - task: DotNetCoreCLI@2
       displayName: Restore
       inputs:

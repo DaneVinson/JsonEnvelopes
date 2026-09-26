@@ -9,10 +9,11 @@ Install the [`JsonEnvelopes` NuGet Package](https://www.nuget.org/packages/JsonE
 
     dotnet add package JsonEnvelopes --version 3.0.0
 
-The package targets **.NET Standard 2.0**, so it runs on .NET Core 2.0+, .NET 5+, and
-.NET Framework 4.6.1+. It depends on `System.Text.Json` 6.0.10 or later. On .NET 6 and
-newer that dependency is already part of the shared framework; on .NET Framework it
-arrives as a package along with its own transitive dependencies.
+The package targets **.NET 10** and **.NET Standard 2.0**. It supports .NET Framework
+4.7.2+ and .NET 8+. Apps on .NET 10 and later use the `net10.0` build, which has no
+package dependencies. Every other app uses the `netstandard2.0` build, which depends on
+`System.Text.Json` 10.0.0 or later and its transitive packages. On .NET 6 and 7, those
+Microsoft packages emit a build warning that the target framework is unsupported.
 
 ## Usage
 
