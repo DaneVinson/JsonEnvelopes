@@ -21,7 +21,7 @@ changed our minds* — the things neither of the other two carries.
 | Library code | 7 files. `Envelope`, `Envelope<TContent>`, `EnvelopeJsonConverter`, `EnvelopeTypeRegistry`, `EnvelopeTypeRegistryBuilder`, `UnknownContentTypeException`, `Extensions` |
 | Tests | **53 passing** as of 2026-09-25, up from 12 |
 | Target framework | library is **`netstandard2.0`**; tests and example remain `net6.0` and still emit `NETSDK1138` |
-| Review backlog | 15 findings from 2026-09-17; **8 closed by 3.0.0**; finding 11 closed on 2026-09-25 except coverage; findings 3 and 14 partly closed; 9, 12, 13 and 15 open. See Section 5 |
+| Review backlog | 15 findings from 2026-09-17; **8 closed by 3.0.0**; finding 11 closed on 2026-09-25 except coverage; finding 12 closed on 2026-09-25; findings 3 and 14 partly closed; 9, 13 and 15 open. See Section 5 |
 | Docs | `readme.md` rewritten for 3.0.0 with a migration guide; `CLAUDE.md`, this file, and the `wrap-up` skill added 2026-09-17 |
 
 ## 2. Repo state
@@ -166,8 +166,8 @@ and probing runtime behavior with a scratch project. Ranked by consequence.
 
 **Findings 1, 2, 4, 5, 6, 7, 8 and 10 were CLOSED by 3.0.0** on 2026-09-18 and are
 struck through below, with the evidence that closed each one. Finding 11 was closed on
-2026-09-25 except for coverage. Findings 3 and 14 are partly closed, and 9, 12, 13 and
-15 remain open. They stay here because each is still true of the tree.
+2026-09-25 except for coverage, and finding 12 was closed the same day. Findings 3 and
+14 are partly closed, and 9, 13 and 15 remain open. They stay here because each is still true of the tree.
 
 **1. ~~Arbitrary type loading from untrusted JSON~~ — CLOSED in 3.0.0.**
 *Evidence: `Type.GetType` is absent from `JsonEnvelopes/`; the original `System.Net.WebClient` payload is refused with `UnknownContentTypeException`; `SecurityTests` pins it. Original finding below.*
@@ -270,7 +270,10 @@ reach consumers), no symbol package, no SourceLink, no deterministic build, no
 `--skip-duplicate`, no tags. `coverlet.collector` is referenced but no coverage is
 collected or published.
 
-**12. The LICENSE has no copyright notice.** It is the MIT body text with the
+**12. ~~The LICENSE has no copyright notice~~ — CLOSED 2026-09-25.**
+*Evidence: `LICENSE` now opens with the `MIT License` heading and `Copyright (c) 2020 Dane Vinson`. The year is the first commit, 2020-10-16; the holder matches `<Authors>` in `JsonEnvelopes/JsonEnvelopes.csproj`. Original finding below.*
+
+It is the MIT body text with the
 `MIT License` heading and the `Copyright (c) <year> <holder>` line removed — while the
 text itself requires that notice be included in all copies. This makes the grant
 ambiguous.
