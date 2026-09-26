@@ -2,12 +2,38 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <!--Match value in JsonEnvelopes.nuspec and readme.md-->
-    <AssemblyVersion>3.0.0</AssemblyVersion>
+    <!--Match the version in readme.md (two places)-->
+    <Version>3.0.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>JsonEnvelopes</PackageId>
+    <Title>JsonEnvelopes</Title>
+    <Authors>Dane Vinson</Authors>
+    <Description>Standardized messaging with System.Text.Json serialization. Targets .NET Standard 2.0.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/DaneVinson/JsonEnvelopes</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/DaneVinson/JsonEnvelopes</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>json;serialization;messaging;envelope;system.text.json</PackageTags>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+
+  <!--Azure Pipelines sets TF_BUILD; local builds keep full paths for the debugger-->
+  <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <!--Match the version declared in JsonEnvelopes.nuspec-->
+    <None Include="..\readme.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="6.0.10" />
   </ItemGroup>
 
