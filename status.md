@@ -365,3 +365,14 @@ Added 2026-09-18:
   intermittent `FileLoadException` saying "Application Control policy has blocked this
   file" on a build that just succeeded. It is a non-deterministic reputation check on
   locally built binaries, not a code defect. Check: rebuild. Change no security setting.
+
+Added 2026-09-25:
+
+- **`git merge -F -` for a merge message.** Symptom: `error: could not read file '-'`,
+  and nothing merges; a later chained `git branch -d` then refuses because the branch is
+  unmerged. `git merge` does not read a message from stdin the way `git commit` does.
+  Check: give merge messages with `-m`, one per paragraph, and read the merge result
+  before deleting the branch. Step 7 of the `wrap-up` skill now says so.
+- **Deleting a file that `JsonEnvelopes.sln` lists as a solution item.** Symptom: none
+  at build time; the `_Solution` folder keeps a dangling entry. Check: after deleting a
+  root-level file, run `grep -n "<file name>" JsonEnvelopes.sln`.
