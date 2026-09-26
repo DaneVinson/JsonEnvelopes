@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-09-25
 **Phase:** 3.0.0 is built, tested and merged to local `main`, but **not published**.
-It targets `netstandard2.0`. Version 2.0.1 remains the latest on nuget.org.
+It targets `netstandard2.0` and `net10.0`. Version 2.0.1 remains the latest on nuget.org.
 
 Companion to [readme.md](readme.md) and [CLAUDE.md](CLAUDE.md). The readme records
 *how to use the package*. CLAUDE.md records *the conventions to write code by*.
@@ -15,13 +15,13 @@ changed our minds* — the things neither of the other two carries.
 
 | | |
 | --- | --- |
-| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) `origin/main` is still at `95c6d62`, the last documentation commit before the 3.0.0 work. Local `main` carries all of 3.0.0, the `netstandard2.0` retarget and the `dotnet pack` packaging change, **unpushed**. Run `git rev-list --count origin/main..main` for the current figure rather than trusting a number written here |
+| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) `origin/main` is still at `95c6d62`, the last documentation commit before the 3.0.0 work. Local `main` carries all of 3.0.0, the `netstandard2.0` retarget, the `dotnet pack` packaging change, the LICENSE notice and the `netstandard2.0;net10.0` multi-target, **unpushed**. Run `git rev-list --count origin/main..main` for the current figure rather than trusting a number written here |
 | Published package | **2.0.1** on nuget.org, `net6.0` only — unchanged |
 | Version in the tree | **3.0.0**, a breaking change, **unpublished** |
 | Library code | 7 files. `Envelope`, `Envelope<TContent>`, `EnvelopeJsonConverter`, `EnvelopeTypeRegistry`, `EnvelopeTypeRegistryBuilder`, `UnknownContentTypeException`, `Extensions` |
-| Tests | **53 passing** as of 2026-09-25, up from 12 |
-| Target framework | library is **`netstandard2.0`**; tests and example remain `net6.0` and still emit `NETSDK1138` |
-| Review backlog | 15 findings from 2026-09-17; **8 closed by 3.0.0**; finding 11 closed on 2026-09-25 except coverage; finding 12 closed on 2026-09-25; findings 3 and 14 partly closed; 9, 13 and 15 open. See Section 5 |
+| Tests | **53 passing on each of `net48` and `net10.0`** as of 2026-09-25, up from 12 |
+| Target framework | library is **`netstandard2.0;net10.0`**; tests are `net48;net10.0`; the example is `net10.0`. No project emits `NETSDK1138` |
+| Review backlog | 15 findings from 2026-09-17; **8 closed by 3.0.0**; findings 3 and 12 closed on 2026-09-25; finding 11 closed on 2026-09-25 except coverage; finding 14 partly closed; 9, 13 and 15 open. See Section 5 |
 | Docs | `readme.md` rewritten for 3.0.0 with a migration guide; `CLAUDE.md`, this file, and the `wrap-up` skill added 2026-09-17 |
 
 ## 2. Repo state
@@ -32,7 +32,7 @@ Three projects in `JsonEnvelopes.sln`:
   `[JsonConverter]` attribute), `Envelope<TContent>`, `EnvelopeJsonConverter`,
   `EnvelopeTypeRegistry`, `EnvelopeTypeRegistryBuilder`,
   `UnknownContentTypeException`, and the now-`internal` `Extensions`.
-- **`JsonEnvelopes.Tests/`** — xunit. 53 tests across `EnvelopeTests`,
+- **`JsonEnvelopes.Tests/`** — xunit, run on `net48` and `net10.0`. 53 tests across `EnvelopeTests`,
   `EnvelopeJsonConverterTests`, `EnvelopeTypeRegistryTests`, `SecurityTests`, and
   `WireFormatTests`.
 - **`JsonEnvelopes.Example/`** — console app demonstrating dispatch through both
@@ -112,6 +112,22 @@ project packs. Accepted loss: `minClientVersion="5.0.0"`, which `dotnet pack` do
 write. `ContinuousIntegrationBuild` is on only when `TF_BUILD` is set, so local PDBs
 keep full paths for the debugger.
 
+**Multi-target `netstandard2.0;net10.0` with a `System.Text.Json` 10.0.0 floor
+(2026-09-25).** The goal is one package for .NET Framework 4.7.2 through .NET 10 and
+11. Apps on .NET 10 and later use the `net10.0` build, which has no package dependency;
+every other app uses the `netstandard2.0` build. The floor is 10.0.0 because 10.x is the
+only `System.Text.Json` branch still serviced after 8.0 and 9.0 reach end of support on
+2026-11-10, and nuget.org lists no advisory against any 10.x release. The floor is the
+first 10.x release, not the latest patch, so consumers choose the patch. Deliberately
+**rejected**: a `net462` target, which would avoid the netstandard facade problems of
+.NET Framework 4.6.1–4.7.1 at the cost of a third build — 4.7.2 is the stated minimum
+instead; a `net8.0` target, which would help for six weeks before .NET 8 leaves support;
+and an 8.x floor, which would have the same unpatchable-floor problem as 6.0.10.
+Accepted consequence: on .NET 6 and 7, `System.Text.Json` 10 and its transitive
+packages emit an unsupported-framework build warning. Verified with scratch consumers:
+`net472` and `net8.0` build clean, `net6.0` warns. The example stays on MediatR 10.0.1,
+because MediatR 13 and later need a commercial license key.
+
 **`status.md` was seeded deliberately, not bootstrapped (2026-09-17).** The
 alternative was letting the `wrap-up` skill create this file on its first run.
 Rejected because the first wrap-up would have shaped the structure around whatever
@@ -128,6 +144,13 @@ that branch happened to touch. The skill maintains this file; it does not define
   and every `<PackageReference>` in `JsonEnvelopes/JsonEnvelopes.csproj` becomes a
   dependency that consumers get. A build-only reference needs `PrivateAssets="all"`,
   or it ships as a dependency.
+- **The `System.Text.Json` reference applies to `netstandard2.0` only.** It sits in a
+  conditioned `ItemGroup` in `JsonEnvelopes/JsonEnvelopes.csproj`. Made unconditional,
+  it would give `net10.0` consumers a package dependency that duplicates the in-box
+  serializer.
+- **Each test target exercises one library build.** `net48` binds to the
+  `netstandard2.0` build and `net10.0` to the `net10.0` build. Dropping `net48` leaves
+  the build that most consumers get untested.
 - **The package version lives in three places across two files.** `<Version>` in
   `JsonEnvelopes/JsonEnvelopes.csproj`, and twice in `readme.md` (the prose version
   and the `dotnet add package` line). They move together or not at all.
@@ -166,8 +189,8 @@ and probing runtime behavior with a scratch project. Ranked by consequence.
 
 **Findings 1, 2, 4, 5, 6, 7, 8 and 10 were CLOSED by 3.0.0** on 2026-09-18 and are
 struck through below, with the evidence that closed each one. Finding 11 was closed on
-2026-09-25 except for coverage, and finding 12 was closed the same day. Findings 3 and
-14 are partly closed, and 9, 13 and 15 remain open. They stay here because each is still true of the tree.
+2026-09-25 except for coverage, and findings 3 and 12 were closed the same day. Finding
+14 is partly closed, and 9, 13 and 15 remain open. They stay here because each is still true of the tree.
 
 **1. ~~Arbitrary type loading from untrusted JSON~~ — CLOSED in 3.0.0.**
 *Evidence: `Type.GetType` is absent from `JsonEnvelopes/`; the original `System.Net.WebClient` payload is refused with `UnknownContentTypeException`; `SecurityTests` pins it. Original finding below.*
@@ -192,7 +215,10 @@ couples two services through a .NET implementation detail — the opposite of th
 "agnostic with respect to message type" goal stated in the readme. **Fix:** the
 registered-logical-name resolver above, plus a schema-version field.
 
-**3. Target framework — partly closed 2026-09-18.** The library now single-targets
+**3. ~~Target framework~~ — CLOSED 2026-09-25.**
+*Evidence: the library targets `netstandard2.0;net10.0`; the `netstandard2.0` build depends on `System.Text.Json` 10.0.0 and the `net10.0` build on nothing, as the packed nuspec's dependency groups show. The tests run on `net48` and `net10.0`, 53 passing on each, and each binds to the matching library build. Both DLLs are strong-named `e6175e4a801927a0`. The example targets `net10.0`. See Section 3. Not done: `FrozenDictionary` in the registry on `net10.0`, which is a separate change. History below.*
+
+Partly closed 2026-09-18: the library single-targeted
 `netstandard2.0` with a `System.Text.Json` 6.0.10 floor, so .NET Framework 4.6.1+ and
 .NET Core 2.0+ consumers are reachable and the library itself no longer emits
 `NETSDK1138`. Verified: all 53 tests pass against the `netstandard2.0` build and the
@@ -290,8 +316,9 @@ sits in `Extensions.cs` rather than in the `.csproj` as `<SignAssembly>`.
 **14. Test coverage — mostly closed, partly open.** Closed in 3.0.0: golden
 write AND read tests on the exact bytes, cross-configuration round-trips, collections
 as content, null arguments, direct `Envelope<T>` serialization, custom naming policies,
-and concurrent reads. 53 tests, up from 12. Still open: no concurrent-`Write` test,
-and test dependencies are from 2022 (xunit 2.4.1, Test.Sdk 17.2.0).
+and concurrent reads. 53 tests, up from 12. Closed 2026-09-25: test dependencies moved
+from 2022 to Microsoft.NET.Test.Sdk 18.10.1, xunit 2.9.3, xunit.runner.visualstudio
+4.0.0 and coverlet.collector 10.0.1. Still open: no concurrent-`Write` test.
 
 **15. Repository hygiene.** No CHANGELOG, CONTRIBUTING, issue or PR templates, CI
 badge, Dependabot, analyzer enforcement, or security policy. `Console.ReadKey()` in
@@ -317,15 +344,15 @@ local `using` directives. A CHANGELOG matters more now that a breaking version e
 
 | | Decision |
 | --- | --- |
-| Target framework | library **`netstandard2.0`**; tests and example **`net6.0`** — see finding 3 |
-| Serializer dependency | **`System.Text.Json` 6.0.10** — the lowest version that both compiles and carries no advisory; see finding 3 |
+| Target framework | library **`netstandard2.0;net10.0`**; tests **`net48;net10.0`**; example **`net10.0`** — see Section 3 |
+| Serializer dependency | **`System.Text.Json` 10.0.0** on `netstandard2.0` only; `net10.0` uses the in-box serializer — see Section 3 |
 | Language version | **C# 10**, pinned in `Directory.Build.props` as `<LangVersion>10.0</LangVersion>` |
 | Nullable / ImplicitUsings | **enabled** in `Directory.Build.props`, never per-project |
-| Local SDK | 10.0.401 is the only SDK installed; it builds `net6.0` fine but warns `NETSDK1138` |
-| Tests | **xunit** 2.4.1, with `coverlet.collector` referenced but unused; 53 tests |
+| Local SDK | 10.0.401 is the only SDK installed; no .NET 8 runtime, so a `net8.0` consumer builds but does not run locally |
+| Tests | **xunit** 2.9.3 on `net48` and `net10.0`, with `coverlet.collector` 10.0.1 referenced but unused; 53 tests per target |
 | Type resolution | **consumer-supplied allow-list** via `EnvelopeTypeRegistry`; no reflection, no `Type.GetType` |
 | Packaging | **`dotnet pack`** from `JsonEnvelopes/JsonEnvelopes.csproj`; `.snupkg` symbols with SourceLink; readme and XML docs in the package |
-| CI | **Azure Pipelines** (repo stays on GitHub), `windows-latest`, SDK 10.x plus the .NET 6 runtime for the `net6.0` tests: restore, build, test, `dotnet pack`, `dotnet nuget push --skip-duplicate` to nuget.org on `main` |
+| CI | **Azure Pipelines** (repo stays on GitHub), `windows-latest`, SDK 10.x; the `net48` tests use the agent's installed .NET Framework, unverified until the next pipeline run: restore, build, test, `dotnet pack`, `dotnet nuget push --skip-duplicate` to nuget.org on `main` |
 | Signing | strong-named via `[assembly: AssemblyKeyFile]` in `Extensions.cs`; key committed; see finding 13 |
 | Line endings | **CRLF** throughout the repo |
 
@@ -379,3 +406,7 @@ Added 2026-09-25:
 - **Deleting a file that `JsonEnvelopes.sln` lists as a solution item.** Symptom: none
   at build time; the `_Solution` folder keeps a dangling entry. Check: after deleting a
   root-level file, run `grep -n "<file name>" JsonEnvelopes.sln`.
+- **Positional records on a .NET Framework target.** Symptom: `CS0518: Predefined type
+  'System.Runtime.CompilerServices.IsExternalInit' is not defined` in `TestModels.cs`
+  when the tests gained `net48`. Check: `JsonEnvelopes.Tests/IsExternalInit.cs` defines
+  it under `#if NETFRAMEWORK`; a new .NET Framework project needs the same file.
