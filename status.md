@@ -15,13 +15,13 @@ changed our minds* — the things neither of the other two carries.
 
 | | |
 | --- | --- |
-| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) `origin/main` is still at `95c6d62`, the last documentation commit before the 3.0.0 work. Local `main` carries all of 3.0.0, the `netstandard2.0` retarget, the `dotnet pack` packaging change, the LICENSE notice and the `netstandard2.0;net10.0` multi-target, **unpushed**. Run `git rev-list --count origin/main..main` for the current figure rather than trusting a number written here |
+| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) `origin/main` is still at `95c6d62`, the last documentation commit before the 3.0.0 work. Local `main` carries all of 3.0.0, the `netstandard2.0` retarget, the `dotnet pack` packaging change, the LICENSE notice, the `netstandard2.0;net10.0` multi-target and the concurrent serialization test, **unpushed**. Run `git rev-list --count origin/main..main` for the current figure rather than trusting a number written here |
 | Published package | **2.0.1** on nuget.org, `net6.0` only — unchanged |
 | Version in the tree | **3.0.0**, a breaking change, **unpublished** |
 | Library code | 7 files. `Envelope`, `Envelope<TContent>`, `EnvelopeJsonConverter`, `EnvelopeTypeRegistry`, `EnvelopeTypeRegistryBuilder`, `UnknownContentTypeException`, `Extensions` |
-| Tests | **53 passing on each of `net48` and `net10.0`** as of 2026-09-25, up from 12 |
+| Tests | **54 passing on each of `net48` and `net10.0`** as of 2026-09-25, up from 12 |
 | Target framework | library is **`netstandard2.0;net10.0`**; tests are `net48;net10.0`; the example is `net10.0`. No project emits `NETSDK1138` |
-| Review backlog | 15 findings from 2026-09-17; **8 closed by 3.0.0**; findings 3 and 12 closed on 2026-09-25; finding 11 closed on 2026-09-25 except coverage; finding 14 partly closed; 9, 13 and 15 open. See Section 5 |
+| Review backlog | 15 findings from 2026-09-17; **8 closed by 3.0.0**; findings 3 and 12 closed on 2026-09-25; finding 11 closed on 2026-09-25 except coverage; finding 14 closed on 2026-09-25; 9, 13 and 15 open. See Section 5 |
 | Docs | `readme.md` rewritten for 3.0.0 with a migration guide; `CLAUDE.md`, this file, and the `wrap-up` skill added 2026-09-17 |
 
 ## 2. Repo state
@@ -32,7 +32,7 @@ Three projects in `JsonEnvelopes.sln`:
   `[JsonConverter]` attribute), `Envelope<TContent>`, `EnvelopeJsonConverter`,
   `EnvelopeTypeRegistry`, `EnvelopeTypeRegistryBuilder`,
   `UnknownContentTypeException`, and the now-`internal` `Extensions`.
-- **`JsonEnvelopes.Tests/`** — xunit, run on `net48` and `net10.0`. 53 tests across `EnvelopeTests`,
+- **`JsonEnvelopes.Tests/`** — xunit, run on `net48` and `net10.0`. 54 tests across `EnvelopeTests`,
   `EnvelopeJsonConverterTests`, `EnvelopeTypeRegistryTests`, `SecurityTests`, and
   `WireFormatTests`.
 - **`JsonEnvelopes.Example/`** — console app demonstrating dispatch through both
@@ -189,8 +189,8 @@ and probing runtime behavior with a scratch project. Ranked by consequence.
 
 **Findings 1, 2, 4, 5, 6, 7, 8 and 10 were CLOSED by 3.0.0** on 2026-09-18 and are
 struck through below, with the evidence that closed each one. Finding 11 was closed on
-2026-09-25 except for coverage, and findings 3 and 12 were closed the same day. Finding
-14 is partly closed, and 9, 13 and 15 remain open. They stay here because each is still true of the tree.
+2026-09-25 except for coverage, and findings 3, 12 and 14 were closed the same day.
+Findings 9, 13 and 15 remain open. They stay here because each is still true of the tree.
 
 **1. ~~Arbitrary type loading from untrusted JSON~~ — CLOSED in 3.0.0.**
 *Evidence: `Type.GetType` is absent from `JsonEnvelopes/`; the original `System.Net.WebClient` payload is refused with `UnknownContentTypeException`; `SecurityTests` pins it. Original finding below.*
@@ -313,12 +313,14 @@ file would not remove it from history. The readme example still shows
 `PublicKeyToken=null`, which is stale. Also, the legacy `[assembly: AssemblyKeyFile]`
 sits in `Extensions.cs` rather than in the `.csproj` as `<SignAssembly>`.
 
-**14. Test coverage — mostly closed, partly open.** Closed in 3.0.0: golden
+**14. ~~Test coverage~~ — CLOSED 2026-09-25.** Closed in 3.0.0: golden
 write AND read tests on the exact bytes, cross-configuration round-trips, collections
 as content, null arguments, direct `Envelope<T>` serialization, custom naming policies,
 and concurrent reads. 53 tests, up from 12. Closed 2026-09-25: test dependencies moved
 from 2022 to Microsoft.NET.Test.Sdk 18.10.1, xunit 2.9.3, xunit.runner.visualstudio
-4.0.0 and coverlet.collector 10.0.1. Still open: no concurrent-`Write` test.
+4.0.0 and coverlet.collector 10.0.1. Closed 2026-09-25: `One_Registry_Serves_Concurrent_Serialization`
+serializes 1,000 envelopes of two registered types in parallel through one options object and
+compares each result to the single-threaded output. 54 tests.
 
 **15. Repository hygiene.** No CHANGELOG, CONTRIBUTING, issue or PR templates, CI
 badge, Dependabot, analyzer enforcement, or security policy. `Console.ReadKey()` in
@@ -349,7 +351,7 @@ local `using` directives. A CHANGELOG matters more now that a breaking version e
 | Language version | **C# 10**, pinned in `Directory.Build.props` as `<LangVersion>10.0</LangVersion>` |
 | Nullable / ImplicitUsings | **enabled** in `Directory.Build.props`, never per-project |
 | Local SDK | 10.0.401 is the only SDK installed; no .NET 8 runtime, so a `net8.0` consumer builds but does not run locally |
-| Tests | **xunit** 2.9.3 on `net48` and `net10.0`, with `coverlet.collector` 10.0.1 referenced but unused; 53 tests per target |
+| Tests | **xunit** 2.9.3 on `net48` and `net10.0`, with `coverlet.collector` 10.0.1 referenced but unused; 54 tests per target |
 | Type resolution | **consumer-supplied allow-list** via `EnvelopeTypeRegistry`; no reflection, no `Type.GetType` |
 | Packaging | **`dotnet pack`** from `JsonEnvelopes/JsonEnvelopes.csproj`; `.snupkg` symbols with SourceLink; readme and XML docs in the package |
 | CI | **Azure Pipelines** (repo stays on GitHub), `windows-latest`, SDK 10.x; the `net48` tests use the agent's installed .NET Framework, unverified until the next pipeline run: restore, build, test, `dotnet pack`, `dotnet nuget push --skip-duplicate` to nuget.org on `main` |
