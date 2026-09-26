@@ -15,7 +15,7 @@ changed our minds* — the things neither of the other two carries.
 
 | | |
 | --- | --- |
-| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) `origin/main` is still at `95c6d62`, the last documentation commit before the 3.0.0 work. Local `main` carries all of 3.0.0, the `netstandard2.0` retarget, the `dotnet pack` packaging change, the LICENSE notice and the `netstandard2.0;net10.0` multi-target, **unpushed**. Run `git rev-list --count origin/main..main` for the current figure rather than trusting a number written here |
+| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) `origin/main` is still at `95c6d62`, the last documentation commit before the 3.0.0 work. Local `main` carries all of 3.0.0, the `netstandard2.0` retarget, the `dotnet pack` packaging change, the LICENSE notice, the `netstandard2.0;net10.0` multi-target and the concurrent serialization test, **unpushed**. Run `git rev-list --count origin/main..main` for the current figure rather than trusting a number written here |
 | Published package | **2.0.1** on nuget.org, `net6.0` only — unchanged |
 | Version in the tree | **3.0.0**, a breaking change, **unpublished** |
 | Library code | 7 files. `Envelope`, `Envelope<TContent>`, `EnvelopeJsonConverter`, `EnvelopeTypeRegistry`, `EnvelopeTypeRegistryBuilder`, `UnknownContentTypeException`, `Extensions` |
