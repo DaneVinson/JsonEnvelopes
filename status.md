@@ -1,6 +1,6 @@
 # JsonEnvelopes — Project Status
 
-**Last updated:** 2026-09-18
+**Last updated:** 2026-09-25
 **Phase:** 3.0.0 is built, tested and merged to local `main`, but **not published**.
 It targets `netstandard2.0`. Version 2.0.1 remains the latest on nuget.org.
 
@@ -21,7 +21,7 @@ changed our minds* — the things neither of the other two carries.
 | Library code | 7 files. `Envelope`, `Envelope<TContent>`, `EnvelopeJsonConverter`, `EnvelopeTypeRegistry`, `EnvelopeTypeRegistryBuilder`, `UnknownContentTypeException`, `Extensions` |
 | Tests | **53 passing** as of 2026-09-18, up from 12 |
 | Target framework | library is **`netstandard2.0`**; tests and example remain `net6.0` and still emit `NETSDK1138` |
-| Review backlog | 15 findings from 2026-09-17; **8 closed by 3.0.0**, finding 3 partly closed, 6 open. See Section 5 |
+| Review backlog | 15 findings from 2026-09-17; **8 closed by 3.0.0**; finding 11 closed on 2026-09-25 except coverage; findings 3 and 14 partly closed; 9, 12, 13 and 15 open. See Section 5 |
 | Docs | `readme.md` rewritten for 3.0.0 with a migration guide; `CLAUDE.md`, this file, and the `wrap-up` skill added 2026-09-17 |
 
 ## 2. Repo state
@@ -101,6 +101,17 @@ the type directly as `content => new Envelope<TContent>((TContent)content)`, so
 `MakeGenericType`, `Activator`, and compiled expressions are all unnecessary. This is
 why finding 8 is fully closed and why finding 9 is now achievable.
 
+**Packaging with `dotnet pack` (2026-09-25).** The hand-written nuspec was deleted
+and all package metadata moved into `JsonEnvelopes/JsonEnvelopes.csproj`, so
+`dotnet pack` generates the nuspec and its dependency group. Design in
+[the spec](docs/superpowers/specs/2026-09-25-dotnet-pack-packaging-design.md).
+Deliberately **rejected**: keeping the nuspec and filling it from the csproj with
+`NuspecProperties` tokens, because two files would still have to agree on the
+dependency group; and package properties in `Directory.Build.props`, because only one
+project packs. Accepted loss: `minClientVersion="5.0.0"`, which `dotnet pack` does not
+write. `ContinuousIntegrationBuild` is on only when `TF_BUILD` is set, so local PDBs
+keep full paths for the debugger.
+
 **`status.md` was seeded deliberately, not bootstrapped (2026-09-17).** The
 alternative was letting the `wrap-up` skill create this file on its first run.
 Rejected because the first wrap-up would have shaped the structure around whatever
@@ -108,23 +119,18 @@ that branch happened to touch. The skill maintains this file; it does not define
 
 ## 4. Load-bearing invariants
 
-- **Pushing `main` publishes a NuGet package.** `azure-pipelines.yml` packs and runs
-  `nuget push` to nuget.org on every `main` commit. The push has no
-  `--skip-duplicate`, so it **fails the pipeline** when the version is unchanged and
-  **publishes irreversibly** when it is changed. Releasing is a deliberate act, never
-  a side effect of landing work.
-- **The `System.Text.Json` version lives in two places.** `<PackageReference>` in
-  `JsonEnvelopes/JsonEnvelopes.csproj` and `<dependency>` in `JsonEnvelopes.nuspec`.
-  A comment in each points at the other. If they drift, the package declares a floor
-  it was not built against.
-- **The `.nuspec` dependency group is not generated.** It is hand-written, so a new
-  `<PackageReference>` in the csproj does NOT reach consumers unless it is added to the
-  nuspec by hand. Before 2026-09-18 the group was empty, which was harmless only
-  because the library had no dependencies.
-- **The package version lives in four places across three files.** `<AssemblyVersion>`
-  in `JsonEnvelopes/JsonEnvelopes.csproj`, `<version>` in `JsonEnvelopes.nuspec`, and
-  twice in `readme.md` (the prose version and the `dotnet add package` line). They
-  move together or not at all.
+- **Pushing `main` publishes a NuGet package.** `azure-pipelines.yml` runs
+  `dotnet pack` and `dotnet nuget push --skip-duplicate` to nuget.org on every `main`
+  commit. An unchanged version is skipped and the pipeline stays green. A changed
+  version **publishes irreversibly**, with its symbol package. Releasing is a
+  deliberate act, never a side effect of landing work.
+- **Package metadata lives only in the csproj.** `dotnet pack` generates the nuspec,
+  and every `<PackageReference>` in `JsonEnvelopes/JsonEnvelopes.csproj` becomes a
+  dependency that consumers get. A build-only reference needs `PrivateAssets="all"`,
+  or it ships as a dependency.
+- **The package version lives in three places across two files.** `<Version>` in
+  `JsonEnvelopes/JsonEnvelopes.csproj`, and twice in `readme.md` (the prose version
+  and the `dotnet add package` line). They move together or not at all.
 - **The serialized JSON is a public contract.** Property names, casing, ordering, and
   the `ContentType` value are what deployed consumers parse. `WireFormatTests` now pins
   the exact bytes in **both directions** — golden writes and golden reads from
@@ -159,9 +165,9 @@ From the review of 2026-09-17, verified by building the library, running the sui
 and probing runtime behavior with a scratch project. Ranked by consequence.
 
 **Findings 1, 2, 4, 5, 6, 7, 8 and 10 were CLOSED by 3.0.0** on 2026-09-18 and are
-struck through below, with the evidence that closed each one. Findings 3, 9, 11, 12,
-13 and 15 remain open, and 14 is partly closed. They stay here because each is still
-true of the tree.
+struck through below, with the evidence that closed each one. Finding 11 was closed on
+2026-09-25 except for coverage. Findings 3 and 14 are partly closed, and 9, 12, 13 and
+15 remain open. They stay here because each is still true of the tree.
 
 **1. ~~Arbitrary type loading from untrusted JSON~~ — CLOSED in 3.0.0.**
 *Evidence: `Type.GetType` is absent from `JsonEnvelopes/`; the original `System.Net.WebClient` payload is refused with `UnknownContentTypeException`; `SecurityTests` pins it. Original finding below.*
@@ -254,7 +260,10 @@ get no warning — their app fails at runtime after publishing trimmed.
 `GetContentTypePropertyName` appear in IntelliSense on every `JsonSerializerOptions`
 in any consuming project. **Fix:** make the class `internal`.
 
-**11. Packaging is hand-rolled and incomplete.** A `.nuspec` with a hardcoded
+**11. ~~Packaging is hand-rolled and incomplete~~ — CLOSED 2026-09-25, except coverage.**
+*Evidence: `JsonEnvelopes.nuspec` is deleted and `dotnet pack` builds from the csproj. A local pack with `TF_BUILD=true` produced a `.nupkg` with the XML docs, `readme.md`, tags and a `<repository>` commit, plus a `.snupkg` with the PDB; the DLL is still strong-named `e6175e4a801927a0`; a comparison with a package built from the old nuspec lost nothing except `minClientVersion`. The pipeline uses SDK 10.x and `--skip-duplicate`. Still open: coverage is not collected, and there are no tags — Dane tags releases by hand. The pipeline change is unverified until its first run on `main`. Original finding below.*
+
+A `.nuspec` with a hardcoded
 `bin\Release\net6.0\` path instead of `dotnet pack`; no `<Version>`, no
 `<PackageReadmeFile>`, no `<GenerateDocumentationFile>` (so the XML doc comments never
 reach consumers), no symbol package, no SourceLink, no deterministic build, no
@@ -312,8 +321,8 @@ local `using` directives. A CHANGELOG matters more now that a breaking version e
 | Local SDK | 10.0.401 is the only SDK installed; it builds `net6.0` fine but warns `NETSDK1138` |
 | Tests | **xunit** 2.4.1, with `coverlet.collector` referenced but unused; 53 tests |
 | Type resolution | **consumer-supplied allow-list** via `EnvelopeTypeRegistry`; no reflection, no `Type.GetType` |
-| Packaging | **hand-written `JsonEnvelopes.nuspec`** with `nuget pack`, not `dotnet pack`; see finding 11 |
-| CI | **Azure Pipelines** (repo stays on GitHub), `windows-latest`: restore, build, test, pack, push to nuget.org on `main` |
+| Packaging | **`dotnet pack`** from `JsonEnvelopes/JsonEnvelopes.csproj`; `.snupkg` symbols with SourceLink; readme and XML docs in the package |
+| CI | **Azure Pipelines** (repo stays on GitHub), `windows-latest`, SDK 10.x plus the .NET 6 runtime for the `net6.0` tests: restore, build, test, `dotnet pack`, `dotnet nuget push --skip-duplicate` to nuget.org on `main` |
 | Signing | strong-named via `[assembly: AssemblyKeyFile]` in `Extensions.cs`; key committed; see finding 13 |
 | Line endings | **CRLF** throughout the repo |
 
@@ -329,11 +338,6 @@ catches it next time.
   nullability annotations at all, so the compiler cannot narrow through the call. Check:
   build the library and read the warnings; write the narrowing explicitly
   (`x is null || x.Length == 0`) rather than suppressing with `!`.
-- **A hand-written .nuspec whose dependency group is empty.** Symptom: none at build or
-  test time. The package ships an assembly whose dependency is undeclared, and the
-  consumer fails at runtime on first use. Check: after adding any `<PackageReference>`,
-  confirm it also appears in `JsonEnvelopes.nuspec`, and compare against what
-  `dotnet pack` generates for the same project.
 - **Appending LF lines to a CRLF file.** Symptom: git reports
   `LF will be replaced by CRLF the next time Git touches it`, and a later normalization
   shows the whole file as changed. Check: after writing, confirm
