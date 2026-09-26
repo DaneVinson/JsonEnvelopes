@@ -187,10 +187,20 @@ Afterwards `git status --porcelain` must be empty. If it isn't, stop.
 
 ```bash
 git checkout main
-git merge --no-ff <branch>
+git merge --no-ff <branch> -m "Merge <what the branch did>" -m "<commit attribution>"
 ```
 
 `--no-ff` always, so every feature lands as one merge commit.
+
+Give the message with `-m`, one per paragraph: a subject in the history's style
+(`Merge the netstandard2.0 retarget`), then the commit attribution this session
+specifies. Never use `-F -`: `git merge` does not read a message from stdin the
+way `git commit` does. It fails with `could not read file '-'` and merges
+nothing. Without any `-m`, a non-interactive shell takes git's default message
+with no attribution.
+
+Run the merge as its own command and read its result before step 8. Do not chain
+the branch delete after it with `;`.
 
 **If the merge conflicts:** run `git merge --abort`, then `git checkout <branch>`,
 and stop. Report the conflicting files. Don't resolve conflicts inside this
