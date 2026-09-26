@@ -13,9 +13,16 @@ jobs:
 
     steps:
     - task: UseDotNet@2
-      displayName: Install .NET 6 SDK
+      displayName: Install .NET 10 SDK
       inputs:
         packageType: 'sdk'
+        version: 10.x
+
+    # The tests and the example still target net6.0 (status.md finding 3), and SDK 10 does not include that runtime
+    - task: UseDotNet@2
+      displayName: Install .NET 6 runtime
+      inputs:
+        packageType: 'runtime'
         version: 6.x
 
     - task: DotNetCoreCLI@2
@@ -38,15 +45,10 @@ jobs:
         projects: '**/JsonEnvelopes.Tests.csproj'
         arguments: '--configuration $(buildConfiguration) --no-restore --no-build -- xunit.parallelizeAssembly=true xunit.parallelizeTestCollections=true'
 
-    - task: NuGetToolInstaller@1
-      displayName: 'Install nuget'  
-      inputs:
-        versionSpec: '*'
-        checkLatest: true
+    - script: dotnet pack JsonEnvelopes/JsonEnvelopes.csproj --configuration $(buildConfiguration) --no-build --output "$(Build.ArtifactStagingDirectory)"
+      displayName: dotnet pack
 
-    - script: nuget pack "$(Build.SourcesDirectory)\JsonEnvelopes.nuspec"
-      displayName: nuget pack
-
-    - script: nuget push "$(Build.SourcesDirectory)\JsonEnvelopes.*.nupkg" -Source https://api.nuget.org/v3/index.json -ApiKey $(NuGet-ApiKey)
-      displayName: 'nuget push -> nuget.org'
+    # Also pushes the matching .snupkg; --skip-duplicate keeps an unchanged version from failing the pipeline
+    - script: dotnet nuget push "$(Build.ArtifactStagingDirectory)\*.nupkg" --source https://api.nuget.org/v3/index.json --api-key $(NuGet-ApiKey) --skip-duplicate
+      displayName: 'dotnet nuget push -> nuget.org'
       condition: and(succeeded(), eq(variables.isMainBranch, 'True'))
