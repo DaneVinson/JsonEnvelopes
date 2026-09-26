@@ -11,11 +11,11 @@ everything to the feature branch, merge it into local `main`, delete the branch.
 Invoking this is permission to commit and merge into **local** `main`. It is not
 permission to touch `origin`: no fetch, no pull, no push.
 
-**Pushing `main` publishes a NuGet package.** `azure-pipelines.yml` packs and
-runs `nuget push` to nuget.org on every `main` commit. That push has no
-`--skip-duplicate`, so it fails the pipeline when the version is unchanged and
-publishes irreversibly when it is changed. Releasing is a separate, deliberate
-act by the user. This skill never pushes.
+**Pushing `main` publishes a NuGet package.** `azure-pipelines.yml` runs
+`dotnet pack` and `dotnet nuget push --skip-duplicate` to nuget.org on every
+`main` commit. An unchanged version is skipped; a changed version publishes
+irreversibly. Releasing is a separate, deliberate act by the user. This skill
+never pushes.
 
 This repo has historically landed work through GitHub pull requests. This skill
 is the local-merge path. If the change should be reviewed on GitHub, say so and
@@ -91,16 +91,16 @@ Two questions this library always has to answer:
 
 ## 4. Check the version is consistent
 
-The package version is duplicated in three files. If the branch changed the
-public API, the wire format, or anything else a consumer would see, all four
+The package version is duplicated in two files. If the branch changed the
+public API, the wire format, or anything else a consumer would see, all three
 occurrences must agree:
 
 ```bash
-grep -rn "2\.0\.1" readme.md JsonEnvelopes.nuspec JsonEnvelopes/JsonEnvelopes.csproj
+grep -n "<Version>" JsonEnvelopes/JsonEnvelopes.csproj
+grep -n "version" readme.md
 ```
 
-- `JsonEnvelopes/JsonEnvelopes.csproj` — `<AssemblyVersion>`
-- `JsonEnvelopes.nuspec` — `<version>`
+- `JsonEnvelopes/JsonEnvelopes.csproj` — `<Version>`
 - `readme.md` — the prose version and the `dotnet add package` line
 
 Bump them together or leave all of them alone. A partial bump is a guard trip:

@@ -15,11 +15,11 @@ changed our minds* — the things neither of the other two carries.
 
 | | |
 | --- | --- |
-| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) `origin/main` is still at `95c6d62`, the last documentation commit before the 3.0.0 work. Local `main` carries all of 3.0.0 and the `netstandard2.0` retarget, **unpushed**. Run `git rev-list --count origin/main..main` for the current figure rather than trusting a number written here |
+| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) `origin/main` is still at `95c6d62`, the last documentation commit before the 3.0.0 work. Local `main` carries all of 3.0.0, the `netstandard2.0` retarget and the `dotnet pack` packaging change, **unpushed**. Run `git rev-list --count origin/main..main` for the current figure rather than trusting a number written here |
 | Published package | **2.0.1** on nuget.org, `net6.0` only — unchanged |
 | Version in the tree | **3.0.0**, a breaking change, **unpublished** |
 | Library code | 7 files. `Envelope`, `Envelope<TContent>`, `EnvelopeJsonConverter`, `EnvelopeTypeRegistry`, `EnvelopeTypeRegistryBuilder`, `UnknownContentTypeException`, `Extensions` |
-| Tests | **53 passing** as of 2026-09-18, up from 12 |
+| Tests | **53 passing** as of 2026-09-25, up from 12 |
 | Target framework | library is **`netstandard2.0`**; tests and example remain `net6.0` and still emit `NETSDK1138` |
 | Review backlog | 15 findings from 2026-09-17; **8 closed by 3.0.0**; finding 11 closed on 2026-09-25 except coverage; findings 3 and 14 partly closed; 9, 12, 13 and 15 open. See Section 5 |
 | Docs | `readme.md` rewritten for 3.0.0 with a migration guide; `CLAUDE.md`, this file, and the `wrap-up` skill added 2026-09-17 |
