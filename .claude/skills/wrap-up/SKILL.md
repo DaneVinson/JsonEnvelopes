@@ -81,13 +81,18 @@ Also list untracked files. The docs record what happened, and branches drift.
 
 Two questions this library always has to answer:
 
-- **Did the public API surface change?** `Envelope`, `Envelope<T>`,
-  `EnvelopeJsonConverter`, and `Extensions` are a published package. A removal or
-  signature change is breaking and needs a major version in step 4.
+- **Did the public API surface change?** `Envelope`, `Envelope<TContent>`,
+  `EnvelopeJsonConverter`, `EnvelopeTypeRegistry`, `EnvelopeTypeRegistryBuilder`,
+  and `UnknownContentTypeException` are a published package. `Extensions` and
+  `EnvelopeRegistration` are `internal` and not part of it. A removal or
+  signature change is breaking and needs a major version in step 4. A type that
+  moves between `public` and `internal` is an API change too.
 - **Did the serialized wire format change?** Property names, casing, ordering, or
-  the `ContentType` string shape. No test pins the exact JSON, so a shape change
-  passes the suite and silently breaks deployed consumers. Call it out explicitly
-  in the report even when it was intended.
+  the `ContentType` value. `WireFormatTests` pins the exact JSON in both
+  directions, so an unintended shape change fails the suite. An intended one has
+  to edit those golden strings: if the diff touches
+  `JsonEnvelopes.Tests/WireFormatTests.cs`, the wire format changed and deployed
+  consumers break. Call it out explicitly in the report even when it was intended.
 
 ## 4. Check the version is consistent
 
