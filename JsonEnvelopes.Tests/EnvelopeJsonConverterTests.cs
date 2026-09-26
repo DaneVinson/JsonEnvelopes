@@ -170,4 +170,29 @@ public class EnvelopeJsonConverterTests
             Assert.IsType<Envelope<FooCommand<BarEntity>>>(result);
         });
     }
+
+    [Fact]
+    public void One_Registry_Serves_Concurrent_Serialization()
+    {
+        var options = NewOptions();
+        var envelopes = Enumerable.Range(0, 1000)
+            .Select(index => index % 2 == 0
+                ? (Envelope)new Envelope<FooCommand<BarEntity>>(
+                    new FooCommand<BarEntity>(new BarEntity($"bar-{index}"), $"foo-{index}"))
+                : new Envelope<BarEntity>(new BarEntity($"bar-{index}")))
+            .ToArray();
+        var expected = envelopes
+            .Select(envelope => JsonSerializer.Serialize(envelope, options))
+            .ToArray();
+        var actual = new string[envelopes.Length];
+
+        Parallel.For(0, envelopes.Length, index =>
+        {
+            actual[index] = JsonSerializer.Serialize(envelopes[index], options);
+        });
+
+        Assert.Equal(expected, actual);
+        Assert.Contains("\"ContentType\":\"Foo.v1\"", actual[0], StringComparison.Ordinal);
+        Assert.Contains("\"ContentType\":\"Bar.v1\"", actual[1], StringComparison.Ordinal);
+    }
 }
