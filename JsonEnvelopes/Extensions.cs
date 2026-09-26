@@ -1,8 +1,4 @@
-﻿using System.Reflection;
-
-[assembly: AssemblyKeyFile("JsonEnvelopes.snk")]
-
-namespace JsonEnvelopes;
+﻿namespace JsonEnvelopes;
 
 /// <summary>
 /// Helpers for resolving the wire names of <see cref="Envelope{TContent}"/>'s properties under a
