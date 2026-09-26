@@ -15,13 +15,13 @@ changed our minds* — the things neither of the other two carries.
 
 | | |
 | --- | --- |
-| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) `origin/main` is still at `95c6d62`, the last documentation commit before the 3.0.0 work. Local `main` carries all of 3.0.0, the `netstandard2.0` retarget, the `dotnet pack` packaging change, the LICENSE notice, the `netstandard2.0;net10.0` multi-target and the concurrent serialization test, **unpushed**. Run `git rev-list --count origin/main..main` for the current figure rather than trusting a number written here |
+| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) `origin/main` is still at `95c6d62`, the last documentation commit before the 3.0.0 work. Local `main` carries all of 3.0.0, the `netstandard2.0` retarget, the `dotnet pack` packaging change, the LICENSE notice, the `netstandard2.0;net10.0` multi-target, the concurrent serialization test and the csproj signing change, **unpushed**. Run `git rev-list --count origin/main..main` for the current figure rather than trusting a number written here |
 | Published package | **2.0.1** on nuget.org, `net6.0` only — unchanged |
 | Version in the tree | **3.0.0**, a breaking change, **unpublished** |
 | Library code | 7 files. `Envelope`, `Envelope<TContent>`, `EnvelopeJsonConverter`, `EnvelopeTypeRegistry`, `EnvelopeTypeRegistryBuilder`, `UnknownContentTypeException`, `Extensions` |
 | Tests | **54 passing on each of `net48` and `net10.0`** as of 2026-09-25, up from 12 |
 | Target framework | library is **`netstandard2.0;net10.0`**; tests are `net48;net10.0`; the example is `net10.0`. No project emits `NETSDK1138` |
-| Review backlog | 15 findings from 2026-09-17; **8 closed by 3.0.0**; findings 3 and 12 closed on 2026-09-25; finding 11 closed on 2026-09-25 except coverage; finding 14 closed on 2026-09-25; 9, 13 and 15 open. See Section 5 |
+| Review backlog | 15 findings from 2026-09-17; **8 closed by 3.0.0**; findings 3 and 12 closed on 2026-09-25; finding 11 closed on 2026-09-25 except coverage; finding 14 closed on 2026-09-25; finding 13 reclassified as by design on 2026-09-25; 9 and 15 open. See Section 5 |
 | Docs | `readme.md` rewritten for 3.0.0 with a migration guide; `CLAUDE.md`, this file, and the `wrap-up` skill added 2026-09-17 |
 
 ## 2. Repo state
@@ -175,6 +175,11 @@ that branch happened to touch. The skill maintains this file; it does not define
   on the abstract base does not apply to the derived generic, so the concrete static
   type bypasses the converter entirely. Since `ContentType` is a `Type`, that path now
   throws `NotSupportedException` rather than emitting a different shape. A test pins it.
+- **The strong-name key never changes.** `JsonEnvelopes/JsonEnvelopes.snk` gives both
+  builds `PublicKeyToken=e6175e4a801927a0`. .NET Framework consumers that are signed
+  themselves can reference only signed assemblies, and they bind to that token. A new
+  key is a new assembly identity, which breaks every one of them. The key is public on
+  purpose; see finding 13.
 - **`Nullable`, `ImplicitUsings`, and `LangVersion` come from `Directory.Build.props`.**
   Never set them in an individual `.csproj`.
 - **`TreatWarningsAsErrors` is not set.** A new nullability or obsolete-API warning
@@ -190,7 +195,7 @@ and probing runtime behavior with a scratch project. Ranked by consequence.
 **Findings 1, 2, 4, 5, 6, 7, 8 and 10 were CLOSED by 3.0.0** on 2026-09-18 and are
 struck through below, with the evidence that closed each one. Finding 11 was closed on
 2026-09-25 except for coverage, and findings 3, 12 and 14 were closed the same day.
-Findings 9, 13 and 15 remain open. They stay here because each is still true of the tree.
+Finding 13 was reclassified as by design the same day. Findings 9 and 15 remain open. They stay here because each is still true of the tree.
 
 **1. ~~Arbitrary type loading from untrusted JSON~~ — CLOSED in 3.0.0.**
 *Evidence: `Type.GetType` is absent from `JsonEnvelopes/`; the original `System.Net.WebClient` payload is refused with `UnknownContentTypeException`; `SecurityTests` pins it. Original finding below.*
@@ -304,7 +309,23 @@ It is the MIT body text with the
 text itself requires that notice be included in all copies. This makes the grant
 ambiguous.
 
-**13. The private signing key is committed.** `JsonEnvelopes/JsonEnvelopes.snk` is
+**13. ~~The private signing key is committed~~ — BY DESIGN, 2026-09-25.**
+*Decision: the key stays committed. The library is strong-named so that signed .NET
+Framework consumers can reference it, and a strong name is an identity, not a security
+boundary. Microsoft's open-source library guidance recommends checking the key into
+source control, so anyone can rebuild or patch the library with the same identity.
+Rejected: public signing with the private key held as a CI secret, which adds pipeline
+complexity for no security gain, and public-signed assemblies can fail to load on .NET
+Framework; and dropping the strong name, which would lock out signed .NET Framework
+consumers. Package authenticity is a separate matter: nuget.org adds a repository
+signature to every package. The two real defects are fixed. Signing moved from the
+obsolete `[assembly: AssemblyKeyFile]` in `Extensions.cs` to `<SignAssembly>` and
+`<AssemblyOriginatorKeyFile>` in `JsonEnvelopes/JsonEnvelopes.csproj`. Both Release
+DLLs are still `StrongNameSigned` with `PublicKeyToken=e6175e4a801927a0`. The stale
+`PublicKeyToken=null` example had already left `readme.md` in the 3.0.0 rewrite.
+Original finding below.*
+
+`JsonEnvelopes/JsonEnvelopes.snk` is
 tracked and the `*.snk` rule at `.gitignore:228` is commented out. Signing does work
 (the built assembly carries `PublicKeyToken=e6175e4a801927a0`), but anyone can now
 produce an assembly with this exact strong-name identity. Strong names are not a
@@ -355,7 +376,7 @@ local `using` directives. A CHANGELOG matters more now that a breaking version e
 | Type resolution | **consumer-supplied allow-list** via `EnvelopeTypeRegistry`; no reflection, no `Type.GetType` |
 | Packaging | **`dotnet pack`** from `JsonEnvelopes/JsonEnvelopes.csproj`; `.snupkg` symbols with SourceLink; readme and XML docs in the package |
 | CI | **Azure Pipelines** (repo stays on GitHub), `windows-latest`, SDK 10.x; the `net48` tests use the agent's installed .NET Framework, unverified until the next pipeline run: restore, build, test, `dotnet pack`, `dotnet nuget push --skip-duplicate` to nuget.org on `main` |
-| Signing | strong-named via `[assembly: AssemblyKeyFile]` in `Extensions.cs`; key committed; see finding 13 |
+| Signing | strong-named via `<SignAssembly>` and `<AssemblyOriginatorKeyFile>` in `JsonEnvelopes/JsonEnvelopes.csproj`; key committed on purpose; see finding 13 |
 | Line endings | **CRLF** throughout the repo |
 
 ## 8. Traps
