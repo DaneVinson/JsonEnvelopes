@@ -292,7 +292,7 @@ get no warning — their app fails at runtime after publishing trimmed.
 in any consuming project. **Fix:** make the class `internal`.
 
 **11. ~~Packaging is hand-rolled and incomplete~~ — CLOSED 2026-09-25, except coverage.**
-*Evidence: `JsonEnvelopes.nuspec` is deleted and `dotnet pack` builds from the csproj. A local pack with `TF_BUILD=true` produced a `.nupkg` with the XML docs, `readme.md`, tags and a `<repository>` commit, plus a `.snupkg` with the PDB; the DLL is still strong-named `e6175e4a801927a0`; a comparison with a package built from the old nuspec lost nothing except `minClientVersion`. The pipeline uses SDK 10.x and `--skip-duplicate`. Still open: coverage is not collected, and there are no tags — Dane tags releases by hand. The pipeline change is unverified until its first run on `main`. Original finding below.*
+*Evidence: `JsonEnvelopes.nuspec` is deleted and `dotnet pack` builds from the csproj. A local pack with `TF_BUILD=true` produced a `.nupkg` with the XML docs, `readme.md`, tags and a `<repository>` commit, plus a `.snupkg` with the PDB; the DLL is still strong-named `e6175e4a801927a0`; a comparison with a package built from the old nuspec lost nothing except `minClientVersion`. The pipeline uses SDK 10.x and `--skip-duplicate`. Still open: coverage is not collected. Not tracked here, by Dane's decision on 2026-09-26: git tags, and the first pipeline run on `main`, which comes with the release. Original finding below.*
 
 A `.nuspec` with a hardcoded
 `bin\Release\net6.0\` path instead of `dotnet pack`; no `<Version>`, no
@@ -361,7 +361,9 @@ local `using` directives. A CHANGELOG matters more now that a breaking version e
 - Findings in Section 5 are advisory until Dane picks one up. Do not start fixing them
   opportunistically; the open ones are not blocking anything.
 - **3.0.0 is built but unpublished.** It reaches nuget.org only when Dane decides to
-  push. Do not push `main` to make CI green or to "finish" the release.
+  push. Do not push `main` to make CI green or to "finish" the release. The release,
+  including the first pipeline run on `main`, is Dane's to do. Do not list it as
+  outstanding work.
 
 ## 7. Toolchain decisions
 
