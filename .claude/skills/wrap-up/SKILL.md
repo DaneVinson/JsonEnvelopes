@@ -96,17 +96,19 @@ Two questions this library always has to answer:
 
 ## 4. Check the version is consistent
 
-The package version is duplicated in two files. If the branch changed the
-public API, the wire format, or anything else a consumer would see, all three
+The package version is duplicated in three files. If the branch changed the
+public API, the wire format, or anything else a consumer would see, all four
 occurrences must agree:
 
 ```bash
 grep -n "<Version>" JsonEnvelopes/JsonEnvelopes.csproj
 grep -n "version" readme.md
+grep -n -m 1 "^## \[" CHANGELOG.md
 ```
 
 - `JsonEnvelopes/JsonEnvelopes.csproj` — `<Version>`
 - `readme.md` — the prose version and the `dotnet add package` line
+- `CHANGELOG.md` — the newest version heading
 
 Bump them together or leave all of them alone. A partial bump is a guard trip:
 stop and report it. Do not bump a version just because code changed — that is a
@@ -141,15 +143,19 @@ explained. Correct it in place when the branch changed the API, the serialized
 shape, the install version, or the usage pattern. It holds current truth only,
 not history.
 
+**`CHANGELOG.md`** — the release history consumers read. When the branch made a
+change a consumer would see, add a line under the newest heading, in the
+Keep a Changelog group that fits (`Added`, `Changed`, `Removed`, `Fixed`,
+`Security`). Skip internal changes such as tests, docs, and CI.
+
 **`CLAUDE.md`** — conventions and project notes for the next session. Update it
 when the branch changed the toolchain, the target framework, the build
 properties, or a convention the file states.
 
 **Anything else that carries state between sessions** — check whether each exists
 and whether the branch affected it: `azure-pipelines.yml` (build, test, or
-publish steps), `Directory.Build.props`, `.gitignore`, `.claude/skills/*` if the
-branch changed a workflow a skill describes, and a `CHANGELOG.md` if one has been
-added since.
+publish steps), `Directory.Build.props`, `.gitignore`, and `.claude/skills/*` if the
+branch changed a workflow a skill describes.
 
 Write full sentences, absolute dates (`YYYY-MM-DD`), and named files and symbols.
 Never write a doc entry you cannot back with the diff.

@@ -21,8 +21,8 @@ changed our minds* — the things neither of the other two carries.
 | Library code | 7 files. `Envelope`, `Envelope<TContent>`, `EnvelopeJsonConverter`, `EnvelopeTypeRegistry`, `EnvelopeTypeRegistryBuilder`, `UnknownContentTypeException`, `Extensions` |
 | Tests | **54 passing on each of `net48` and `net10.0`** as of 2026-09-25, up from 12 |
 | Target framework | library is **`netstandard2.0;net10.0`**; tests are `net48;net10.0`; the example is `net10.0`. No project emits `NETSDK1138` |
-| Review backlog | 15 findings from 2026-09-17; **8 closed by 3.0.0**; findings 3 and 12 closed on 2026-09-25; finding 11 closed on 2026-09-25 except coverage; finding 14 closed on 2026-09-25; finding 13 reclassified as by design on 2026-09-25; 9 and 15 open. See Section 5 |
-| Docs | `readme.md` rewritten for 3.0.0 with a migration guide; `CLAUDE.md`, this file, and the `wrap-up` skill added 2026-09-17 |
+| Review backlog | 15 findings from 2026-09-17; **8 closed by 3.0.0**; findings 3 and 12 closed on 2026-09-25; finding 11 closed on 2026-09-25 except coverage; finding 14 closed on 2026-09-25; finding 13 reclassified as by design on 2026-09-25; finding 15 removed on 2026-09-26; 9 open. See Section 5 |
+| Docs | `readme.md` rewritten for 3.0.0 with a migration guide; `CLAUDE.md`, this file, and the `wrap-up` skill added 2026-09-17; `CHANGELOG.md` added 2026-09-26, covering every published version from 0.5.0 and the unreleased 3.0.0 |
 
 ## 2. Repo state
 
@@ -151,9 +151,10 @@ that branch happened to touch. The skill maintains this file; it does not define
 - **Each test target exercises one library build.** `net48` binds to the
   `netstandard2.0` build and `net10.0` to the `net10.0` build. Dropping `net48` leaves
   the build that most consumers get untested.
-- **The package version lives in three places across two files.** `<Version>` in
-  `JsonEnvelopes/JsonEnvelopes.csproj`, and twice in `readme.md` (the prose version
-  and the `dotnet add package` line). They move together or not at all.
+- **The package version lives in four places across three files.** `<Version>` in
+  `JsonEnvelopes/JsonEnvelopes.csproj`, twice in `readme.md` (the prose version and the
+  `dotnet add package` line), and the newest heading in `CHANGELOG.md`. They move
+  together or not at all. A consumer-visible change adds a line under that heading.
 - **The serialized JSON is a public contract.** Property names, casing, ordering, and
   the `ContentType` value are what deployed consumers parse. `WireFormatTests` now pins
   the exact bytes in **both directions** — golden writes and golden reads from
@@ -195,7 +196,9 @@ and probing runtime behavior with a scratch project. Ranked by consequence.
 **Findings 1, 2, 4, 5, 6, 7, 8 and 10 were CLOSED by 3.0.0** on 2026-09-18 and are
 struck through below, with the evidence that closed each one. Finding 11 was closed on
 2026-09-25 except for coverage, and findings 3, 12 and 14 were closed the same day.
-Finding 13 was reclassified as by design the same day. Findings 9 and 15 remain open. They stay here because each is still true of the tree.
+Finding 13 was reclassified as by design the same day. Finding 15, repository hygiene, was
+removed on 2026-09-26: `CHANGELOG.md` was added, and Dane decided not to do the rest.
+Finding 9 remains open. It stays here because it is still true of the tree.
 
 **1. ~~Arbitrary type loading from untrusted JSON~~ — CLOSED in 3.0.0.**
 *Evidence: `Type.GetType` is absent from `JsonEnvelopes/`; the original `System.Net.WebClient` payload is refused with `UnknownContentTypeException`; `SecurityTests` pins it. Original finding below.*
@@ -342,12 +345,6 @@ from 2022 to Microsoft.NET.Test.Sdk 18.10.1, xunit 2.9.3, xunit.runner.visualstu
 4.0.0 and coverlet.collector 10.0.1. Closed 2026-09-25: `One_Registry_Serves_Concurrent_Serialization`
 serializes 1,000 envelopes of two registered types in parallel through one options object and
 compares each result to the single-threaded output. 54 tests.
-
-**15. Repository hygiene.** No CHANGELOG, CONTRIBUTING, issue or PR templates, CI
-badge, Dependabot, analyzer enforcement, or security policy. `Console.ReadKey()` in
-`JsonEnvelopes.Example/Program.cs` still makes the example hang in CI. Partly closed:
-`CommandDispatcher.cs` was rewritten with a file-scoped namespace and no redundant
-local `using` directives. A CHANGELOG matters more now that a breaking version exists.
 
 ## 6. Working agreements
 
