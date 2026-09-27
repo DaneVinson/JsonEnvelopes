@@ -1,6 +1,6 @@
 # JsonEnvelopes — Project Status
 
-**Last updated:** 2026-09-25
+**Last updated:** 2026-09-26
 **Phase:** 3.0.0 is built, tested and merged to local `main`, but **not published**.
 It targets `netstandard2.0` and `net10.0`. Version 2.0.1 remains the latest on nuget.org.
 
@@ -221,7 +221,7 @@ couples two services through a .NET implementation detail — the opposite of th
 registered-logical-name resolver above, plus a schema-version field.
 
 **3. ~~Target framework~~ — CLOSED 2026-09-25.**
-*Evidence: the library targets `netstandard2.0;net10.0`; the `netstandard2.0` build depends on `System.Text.Json` 10.0.0 and the `net10.0` build on nothing, as the packed nuspec's dependency groups show. The tests run on `net48` and `net10.0`, 53 passing on each, and each binds to the matching library build. Both DLLs are strong-named `e6175e4a801927a0`. The example targets `net10.0`. See Section 3. Not done: `FrozenDictionary` in the registry on `net10.0`, which is a separate change. History below.*
+*Evidence: the library targets `netstandard2.0;net10.0`; the `netstandard2.0` build depends on `System.Text.Json` 10.0.0 and the `net10.0` build on nothing, as the packed nuspec's dependency groups show. The tests run on `net48` and `net10.0`, 53 passing on each, and each binds to the matching library build. Both DLLs are strong-named `e6175e4a801927a0`. The example targets `net10.0`. See Section 3. Rejected 2026-09-26: `FrozenDictionary` in the registry on `net10.0`. It needs an `#if` branch beside the one-line `Dictionary` copy, and a dictionary lookup is a small part of the per-message cost. History below.*
 
 Partly closed 2026-09-18: the library single-targeted
 `netstandard2.0` with a `System.Text.Json` 6.0.10 floor, so .NET Framework 4.6.1+ and
@@ -292,7 +292,7 @@ get no warning — their app fails at runtime after publishing trimmed.
 in any consuming project. **Fix:** make the class `internal`.
 
 **11. ~~Packaging is hand-rolled and incomplete~~ — CLOSED 2026-09-25, except coverage.**
-*Evidence: `JsonEnvelopes.nuspec` is deleted and `dotnet pack` builds from the csproj. A local pack with `TF_BUILD=true` produced a `.nupkg` with the XML docs, `readme.md`, tags and a `<repository>` commit, plus a `.snupkg` with the PDB; the DLL is still strong-named `e6175e4a801927a0`; a comparison with a package built from the old nuspec lost nothing except `minClientVersion`. The pipeline uses SDK 10.x and `--skip-duplicate`. Still open: coverage is not collected, and there are no tags — Dane tags releases by hand. The pipeline change is unverified until its first run on `main`. Original finding below.*
+*Evidence: `JsonEnvelopes.nuspec` is deleted and `dotnet pack` builds from the csproj. A local pack with `TF_BUILD=true` produced a `.nupkg` with the XML docs, `readme.md`, tags and a `<repository>` commit, plus a `.snupkg` with the PDB; the DLL is still strong-named `e6175e4a801927a0`; a comparison with a package built from the old nuspec lost nothing except `minClientVersion`. The pipeline uses SDK 10.x and `--skip-duplicate`. Still open: coverage is not collected. Not tracked here, by Dane's decision on 2026-09-26: git tags, and the first pipeline run on `main`, which comes with the release. Original finding below.*
 
 A `.nuspec` with a hardcoded
 `bin\Release\net6.0\` path instead of `dotnet pack`; no `<Version>`, no
@@ -361,7 +361,9 @@ local `using` directives. A CHANGELOG matters more now that a breaking version e
 - Findings in Section 5 are advisory until Dane picks one up. Do not start fixing them
   opportunistically; the open ones are not blocking anything.
 - **3.0.0 is built but unpublished.** It reaches nuget.org only when Dane decides to
-  push. Do not push `main` to make CI green or to "finish" the release.
+  push. Do not push `main` to make CI green or to "finish" the release. The release,
+  including the first pipeline run on `main`, is Dane's to do. Do not list it as
+  outstanding work.
 
 ## 7. Toolchain decisions
 
