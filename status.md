@@ -1,6 +1,6 @@
 # JsonEnvelopes — Project Status
 
-**Last updated:** 2026-09-25
+**Last updated:** 2026-09-26
 **Phase:** 3.0.0 is built, tested and merged to local `main`, but **not published**.
 It targets `netstandard2.0` and `net10.0`. Version 2.0.1 remains the latest on nuget.org.
 
@@ -221,7 +221,7 @@ couples two services through a .NET implementation detail — the opposite of th
 registered-logical-name resolver above, plus a schema-version field.
 
 **3. ~~Target framework~~ — CLOSED 2026-09-25.**
-*Evidence: the library targets `netstandard2.0;net10.0`; the `netstandard2.0` build depends on `System.Text.Json` 10.0.0 and the `net10.0` build on nothing, as the packed nuspec's dependency groups show. The tests run on `net48` and `net10.0`, 53 passing on each, and each binds to the matching library build. Both DLLs are strong-named `e6175e4a801927a0`. The example targets `net10.0`. See Section 3. Not done: `FrozenDictionary` in the registry on `net10.0`, which is a separate change. History below.*
+*Evidence: the library targets `netstandard2.0;net10.0`; the `netstandard2.0` build depends on `System.Text.Json` 10.0.0 and the `net10.0` build on nothing, as the packed nuspec's dependency groups show. The tests run on `net48` and `net10.0`, 53 passing on each, and each binds to the matching library build. Both DLLs are strong-named `e6175e4a801927a0`. The example targets `net10.0`. See Section 3. Rejected 2026-09-26: `FrozenDictionary` in the registry on `net10.0`. It needs an `#if` branch beside the one-line `Dictionary` copy, and a dictionary lookup is a small part of the per-message cost. History below.*
 
 Partly closed 2026-09-18: the library single-targeted
 `netstandard2.0` with a `System.Text.Json` 6.0.10 floor, so .NET Framework 4.6.1+ and
