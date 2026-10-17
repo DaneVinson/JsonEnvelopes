@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test-publish:
+    name: 'Windows: build, test and publish to nuget.org'
+    runs-on: windows-latest
+    permissions:
+      contents: read
+      # Lets NuGet/login request the OIDC token that nuget.org Trusted Publishing exchanges for a short-lived key
+      id-token: write
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Install .NET 10 SDK
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 10.x
+
+    - name: Restore
+      run: dotnet restore JsonEnvelopes.slnx
+
+    - name: Build
+      run: dotnet build JsonEnvelopes.slnx --configuration Release --no-restore
+
+    - name: Test
+      run: dotnet test JsonEnvelopes.Tests/JsonEnvelopes.Tests.csproj --configuration Release --no-restore --no-build -- xunit.parallelizeAssembly=true xunit.parallelizeTestCollections=true
+
+    - name: dotnet pack
+      run: dotnet pack JsonEnvelopes/JsonEnvelopes.csproj --configuration Release --no-build --output artifacts
+
+    # The policy on nuget.org names this repo and this workflow file; renaming the file breaks publishing
+    - name: nuget.org login
+      id: login
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: NuGet/login@v1
+      with:
+        user: ${{ secrets.NUGET_USER }}
+
+    # Also pushes the matching .snupkg; --skip-duplicate keeps an unchanged version from failing the workflow
+    - name: dotnet nuget push -> nuget.org
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: dotnet nuget push "artifacts/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --skip-duplicate

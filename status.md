@@ -133,8 +133,21 @@ because MediatR 13 and later need a commercial license key.
 converted `JsonEnvelopes.sln` to the XML `.slnx` format, keeping the three projects and
 the `_Solution` items, and the `.sln` was deleted. Deliberately **rejected**: keeping both
 files, because with two solution files in the root a bare `dotnet build` stops and asks
-which one to use. `azure-pipelines.yml` and the `wrap-up` skill build `JsonEnvelopes.slnx`.
-The format needs SDK 9.0.200 or later; the pipeline installs 10.x.
+which one to use. `.github/workflows/ci.yml` and the `wrap-up` skill build `JsonEnvelopes.slnx`.
+The format needs SDK 9.0.200 or later; the workflow installs 10.x.
+
+**CI moved from Azure Pipelines to GitHub Actions with nuget.org Trusted Publishing
+(2026-10-16).** The nuget.org API key in the `NuGet-ApiKey` pipeline variable had expired,
+and nuget.org now marks API keys "Not recommended". Trusted Publishing exchanges a GitHub
+OIDC token for a nuget.org key that lives about one hour, so no long-lived secret exists to
+expire or leak. `azure-pipelines.yml` was deleted and `.github/workflows/ci.yml` replaces
+it with the same steps. The workflow also builds and tests pull requests to `main`, but
+only a push to `main` logs in and pushes. `ContinuousIntegrationBuild` now keys on
+`GITHUB_ACTIONS` instead of `TF_BUILD`. Deliberately **rejected**: a new API key on Azure
+Pipelines, because nuget.org supports Trusted Publishing only from GitHub Actions, and a
+key expires again within a year. Setup outside the repo, done by Dane: a Trusted Publishing
+policy on nuget.org for `DaneVinson/JsonEnvelopes` and `ci.yml`, a `NUGET_USER` repository
+secret with the nuget.org user name, and disabling the Azure DevOps pipeline.
 
 **`status.md` was seeded deliberately, not bootstrapped (2026-09-17).** The
 alternative was letting the `wrap-up` skill create this file on its first run.
@@ -143,11 +156,14 @@ that branch happened to touch. The skill maintains this file; it does not define
 
 ## 4. Load-bearing invariants
 
-- **Pushing `main` publishes a NuGet package.** `azure-pipelines.yml` runs
+- **Pushing `main` publishes a NuGet package.** `.github/workflows/ci.yml` runs
   `dotnet pack` and `dotnet nuget push --skip-duplicate` to nuget.org on every `main`
-  commit. An unchanged version is skipped and the pipeline stays green. A changed
+  commit. An unchanged version is skipped and the workflow stays green. A changed
   version **publishes irreversibly**, with its symbol package. Releasing is a
   deliberate act, never a side effect of landing work.
+- **The workflow file name is part of the publishing credential.** The nuget.org
+  Trusted Publishing policy names the repo and `ci.yml`. Renaming or moving the file,
+  or renaming the repo, makes the `NuGet/login` step fail until the policy is updated.
 - **Package metadata lives only in the csproj.** `dotnet pack` generates the nuspec,
   and every `<PackageReference>` in `JsonEnvelopes/JsonEnvelopes.csproj` becomes a
   dependency that consumers get. A build-only reference needs `PrivateAssets="all"`,
@@ -383,7 +399,7 @@ compares each result to the single-threaded output. 54 tests.
 | Tests | **xunit** 2.9.3 on `net48` and `net10.0`, with `coverlet.collector` 10.0.1 referenced but unused; 54 tests per target |
 | Type resolution | **consumer-supplied allow-list** via `EnvelopeTypeRegistry`; no reflection, no `Type.GetType` |
 | Packaging | **`dotnet pack`** from `JsonEnvelopes/JsonEnvelopes.csproj`; `.snupkg` symbols with SourceLink; readme and XML docs in the package |
-| CI | **Azure Pipelines** (repo stays on GitHub), `windows-latest`, SDK 10.x; the `net48` tests use the agent's installed .NET Framework, unverified until the next pipeline run: restore, build, test, `dotnet pack`, `dotnet nuget push --skip-duplicate` to nuget.org on `main` |
+| CI | **GitHub Actions**, `.github/workflows/ci.yml`, `windows-latest`, SDK 10.x; the `net48` tests use the runner's installed .NET Framework: restore, build, test and `dotnet pack` on pushes and pull requests to `main`; on a push to `main` only, `NuGet/login` (Trusted Publishing) and `dotnet nuget push --skip-duplicate` to nuget.org. Unverified until its first run on GitHub. Replaced Azure Pipelines on 2026-10-16 — see Section 3 |
 | Signing | strong-named via `<SignAssembly>` and `<AssemblyOriginatorKeyFile>` in `JsonEnvelopes/JsonEnvelopes.csproj`; key committed on purpose; see finding 13 |
 | Line endings | **CRLF** throughout the repo |
 
