@@ -54,7 +54,7 @@ but note it, because it makes a conflict possible in step 7.
 The branch does not land red. Run both, from the repo root:
 
 ```bash
-dotnet build JsonEnvelopes.sln --configuration Release
+dotnet build JsonEnvelopes.slnx --configuration Release
 ```
 
 ```bash
