@@ -44,10 +44,11 @@ carries the 3.0.0 work. Earlier documentation commits were pushed on 2026-09-17,
 `95c6d62`; version 2.0.1 was unchanged at the time, so the pipeline's `nuget push` step
 is expected to have failed on a duplicate — see finding 11.
 
-**The 2026-10-16 push ran the pipeline with version 3.0.0 in the tree**, so 3.0.0 is
-expected to be on nuget.org. Neither the pipeline result nor the nuget.org listing was
-checked when this was written. Check both before the Phase line, the "Published
-package" row, and the "Version in the tree" row are changed to say 3.0.0 is published.
+**The 2026-10-16 push ran the Azure pipeline with version 3.0.0 in the tree, but the
+push step failed.** Dane reported on 2026-10-16 that the pipeline's nuget.org API key had
+expired long before, so 3.0.0 did not publish. Check the nuget.org listing before the Phase
+line, the "Published package" row, and the "Version in the tree" row are changed to say
+3.0.0 is published.
 
 No git tags exist, so published version 2.0.1 cannot be mapped to a commit.
 
@@ -145,9 +146,11 @@ it with the same steps. The workflow also builds and tests pull requests to `mai
 only a push to `main` logs in and pushes. `ContinuousIntegrationBuild` now keys on
 `GITHUB_ACTIONS` instead of `TF_BUILD`. Deliberately **rejected**: a new API key on Azure
 Pipelines, because nuget.org supports Trusted Publishing only from GitHub Actions, and a
-key expires again within a year. Setup outside the repo, done by Dane: a Trusted Publishing
-policy on nuget.org for `DaneVinson/JsonEnvelopes` and `ci.yml`, a `NUGET_USER` repository
-secret with the nuget.org user name, and disabling the Azure DevOps pipeline.
+key expires again within a year. Setup outside the repo, done by Dane: on 2026-10-16, a
+Trusted Publishing policy on nuget.org for `DaneVinson/JsonEnvelopes`, workflow file
+`ci.yml`, package `JsonEnvelopes`, and no environment. Also needed, not confirmed when this
+was written: a `NUGET_USER` repository secret with the nuget.org user name, and disabling
+the Azure DevOps pipeline so it does not run on the next push.
 
 **`status.md` was seeded deliberately, not bootstrapped (2026-09-17).** The
 alternative was letting the `wrap-up` skill create this file on its first run.
