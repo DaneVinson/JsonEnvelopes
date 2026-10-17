@@ -11,7 +11,7 @@ everything to the feature branch, merge it into local `main`, delete the branch.
 Invoking this is permission to commit and merge into **local** `main`. It is not
 permission to touch `origin`: no fetch, no pull, no push.
 
-**Pushing `main` publishes a NuGet package.** `azure-pipelines.yml` runs
+**Pushing `main` publishes a NuGet package.** `.github/workflows/ci.yml` runs
 `dotnet pack` and `dotnet nuget push --skip-duplicate` to nuget.org on every
 `main` commit. An unchanged version is skipped; a changed version publishes
 irreversibly. Releasing is a separate, deliberate act by the user. This skill
@@ -153,7 +153,7 @@ when the branch changed the toolchain, the target framework, the build
 properties, or a convention the file states.
 
 **Anything else that carries state between sessions** — check whether each exists
-and whether the branch affected it: `azure-pipelines.yml` (build, test, or
+and whether the branch affected it: `.github/workflows/ci.yml` (build, test, or
 publish steps), `Directory.Build.props`, `.gitignore`, and `.claude/skills/*` if the
 branch changed a workflow a skill describes.
 

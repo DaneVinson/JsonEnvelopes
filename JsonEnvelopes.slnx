@@ -1,7 +1,7 @@
 <Solution>
   <Folder Name="/_Solution/">
     <File Path=".gitignore" />
-    <File Path="azure-pipelines.yml" />
+    <File Path=".github/workflows/ci.yml" />
     <File Path="CHANGELOG.md" />
     <File Path="Directory.Build.props" />
     <File Path="LICENSE" />

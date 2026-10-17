@@ -28,8 +28,8 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 
-  <!--Azure Pipelines sets TF_BUILD; local builds keep full paths for the debugger-->
-  <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
+  <!--GitHub Actions sets GITHUB_ACTIONS; local builds keep full paths for the debugger-->
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
