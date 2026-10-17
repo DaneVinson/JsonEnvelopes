@@ -15,7 +15,7 @@ changed our minds* — the things neither of the other two carries.
 
 | | |
 | --- | --- |
-| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) `origin/main` is still at `95c6d62`, the last documentation commit before the 3.0.0 work. Local `main` carries all of 3.0.0, the `netstandard2.0` retarget, the `dotnet pack` packaging change, the LICENSE notice, the `netstandard2.0;net10.0` multi-target, the concurrent serialization test and the csproj signing change, **unpushed**. Run `git rev-list --count origin/main..main` for the current figure rather than trusting a number written here |
+| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) `origin/main` is at `e2ce6a9`, the merge of the CHANGELOG, pushed on 2026-10-16. It carries all of 3.0.0, the `netstandard2.0` retarget, the `dotnet pack` packaging change, the LICENSE notice, the `netstandard2.0;net10.0` multi-target, the concurrent serialization test and the csproj signing change. Local `main` adds the `.slnx` migration and later work, **unpushed**. Run `git rev-list --count origin/main..main` for the current figure rather than trusting a number written here |
 | Published package | **2.0.1** on nuget.org, `net6.0` only — unchanged |
 | Version in the tree | **3.0.0**, a breaking change, **unpublished** |
 | Library code | 7 files. `Envelope`, `Envelope<TContent>`, `EnvelopeJsonConverter`, `EnvelopeTypeRegistry`, `EnvelopeTypeRegistryBuilder`, `UnknownContentTypeException`, `Extensions` |
@@ -38,15 +38,16 @@ Three projects in `JsonEnvelopes.slnx`:
 - **`JsonEnvelopes.Example/`** — console app demonstrating dispatch through both
   MediatR and a hand-rolled `CommandDispatcher`. Not packable.
 
-Local `main` carries the merged 3.0.0 work and is **well ahead of `origin/main`**,
-which sits at the documentation commit `95c6d62`. Earlier documentation commits were
-pushed on 2026-09-17 from outside the session that wrote them; version 2.0.1 was
-unchanged at the time, so the pipeline's `nuget push` step is expected to have failed
-on a duplicate — see finding 11.
+`origin/main` sits at `e2ce6a9`, the merge of the CHANGELOG and the removal of
+finding 15. It was pushed on 2026-10-16 from outside the session that wrote this, and it
+carries the 3.0.0 work. Earlier documentation commits were pushed on 2026-09-17, up to
+`95c6d62`; version 2.0.1 was unchanged at the time, so the pipeline's `nuget push` step
+is expected to have failed on a duplicate — see finding 11.
 
-**Pushing `main` now would publish 3.0.0 to nuget.org irreversibly**, because the
-version in the tree did change. That is a release decision, not a side effect of
-landing work — see Section 4.
+**The 2026-10-16 push ran the pipeline with version 3.0.0 in the tree**, so 3.0.0 is
+expected to be on nuget.org. Neither the pipeline result nor the nuget.org listing was
+checked when this was written. Check both before the Phase line, the "Published
+package" row, and the "Version in the tree" row are changed to say 3.0.0 is published.
 
 No git tags exist, so published version 2.0.1 cannot be mapped to a commit.
 
