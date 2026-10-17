@@ -4,7 +4,7 @@ All notable changes to the `JsonEnvelopes` package are recorded here. The format
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the package uses
 [Semantic Versioning](https://semver.org/). Dates are the nuget.org publish dates.
 
-## [3.0.0] - Unreleased
+## [3.0.0] - 2026-10-16
 
 A breaking change. The wire format is not compatible with 2.x: 3.0.0 cannot read messages
 that 2.x wrote, so drain any queue before you upgrade. The readme's

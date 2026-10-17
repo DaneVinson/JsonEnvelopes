@@ -1,8 +1,8 @@
 # JsonEnvelopes — Project Status
 
 **Last updated:** 2026-10-16
-**Phase:** 3.0.0 is built, tested and merged to local `main`, but **not published**.
-It targets `netstandard2.0` and `net10.0`. Version 2.0.1 remains the latest on nuget.org.
+**Phase:** 3.0.0 is **published** to nuget.org, on 2026-10-16, by the first successful
+GitHub Actions run on `main`. It targets `netstandard2.0` and `net10.0`.
 
 Companion to [readme.md](readme.md) and [CLAUDE.md](CLAUDE.md). The readme records
 *how to use the package*. CLAUDE.md records *the conventions to write code by*.
@@ -15,14 +15,14 @@ changed our minds* — the things neither of the other two carries.
 
 | | |
 | --- | --- |
-| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) `origin/main` is at `e2ce6a9`, the merge of the CHANGELOG, pushed on 2026-10-16. It carries all of 3.0.0, the `netstandard2.0` retarget, the `dotnet pack` packaging change, the LICENSE notice, the `netstandard2.0;net10.0` multi-target, the concurrent serialization test and the csproj signing change. Local `main` adds the `.slnx` migration and later work, **unpushed**. Run `git rev-list --count origin/main..main` for the current figure rather than trusting a number written here |
-| Published package | **2.0.1** on nuget.org, `net6.0` only — unchanged |
-| Version in the tree | **3.0.0**, a breaking change, **unpublished** |
+| Repo | on `main`; [GitHub](https://github.com/DaneVinson/JsonEnvelopes) `origin/main` is at `78e3527`, the `nuget push` file pattern fix, pushed on 2026-10-16. It carries all of 3.0.0, the `.slnx` migration and the GitHub Actions workflow. Run `git rev-list --count origin/main..main` for the current figure rather than trusting a number written here |
+| Published package | **3.0.0** on nuget.org, `netstandard2.0;net10.0`, published 2026-10-16 with its symbol package. The previous version was 2.0.1, `net6.0` only |
+| Version in the tree | **3.0.0**, a breaking change, **published**. The next change to ship needs a version bump, or `--skip-duplicate` skips it |
 | Library code | 7 files. `Envelope`, `Envelope<TContent>`, `EnvelopeJsonConverter`, `EnvelopeTypeRegistry`, `EnvelopeTypeRegistryBuilder`, `UnknownContentTypeException`, `Extensions` |
 | Tests | **54 passing on each of `net48` and `net10.0`** as of 2026-09-25, up from 12 |
 | Target framework | library is **`netstandard2.0;net10.0`**; tests are `net48;net10.0`; the example is `net10.0`. No project emits `NETSDK1138` |
 | Review backlog | 15 findings from 2026-09-17; **8 closed by 3.0.0**; findings 3 and 12 closed on 2026-09-25; finding 11 closed on 2026-09-25 except coverage; finding 14 closed on 2026-09-25; finding 13 reclassified as by design on 2026-09-25; finding 15 removed on 2026-09-26; 9 open. See Section 5 |
-| Docs | `readme.md` rewritten for 3.0.0 with a migration guide; `CLAUDE.md`, this file, and the `wrap-up` skill added 2026-09-17; `CHANGELOG.md` added 2026-09-26, covering every published version from 0.5.0 and the unreleased 3.0.0 |
+| Docs | `readme.md` rewritten for 3.0.0 with a migration guide; `CLAUDE.md`, this file, and the `wrap-up` skill added 2026-09-17; `CHANGELOG.md` added 2026-09-26, covering every published version from 0.5.0 through 3.0.0 |
 
 ## 2. Repo state
 
@@ -38,19 +38,19 @@ Three projects in `JsonEnvelopes.slnx`:
 - **`JsonEnvelopes.Example/`** — console app demonstrating dispatch through both
   MediatR and a hand-rolled `CommandDispatcher`. Not packable.
 
-`origin/main` sits at `e2ce6a9`, the merge of the CHANGELOG and the removal of
-finding 15. It was pushed on 2026-10-16 from outside the session that wrote this, and it
-carries the 3.0.0 work. Earlier documentation commits were pushed on 2026-09-17, up to
-`95c6d62`; version 2.0.1 was unchanged at the time, so the pipeline's `nuget push` step
-is expected to have failed on a duplicate — see finding 11.
+`origin/main` sits at `78e3527`. Earlier documentation commits were pushed on
+2026-09-17, up to `95c6d62`; version 2.0.1 was unchanged at the time, so the pipeline's
+`nuget push` step is expected to have failed on a duplicate — see finding 11.
 
-**The 2026-10-16 push ran the Azure pipeline with version 3.0.0 in the tree, but the
-push step failed.** Dane reported on 2026-10-16 that the pipeline's nuget.org API key had
-expired long before, so 3.0.0 did not publish. Check the nuget.org listing before the Phase
-line, the "Published package" row, and the "Version in the tree" row are changed to say
-3.0.0 is published.
+**3.0.0 was published on 2026-10-16, on the third attempt.** The first push, of
+`e2ce6a9`, ran the Azure pipeline, and its push step failed because the nuget.org API key
+had expired. The GitHub Actions workflow then failed twice: the `NuGet/login` step stopped
+with `Input required and not supplied: user` until Dane added the `NUGET_USER` secret, and
+the push step reported `File does not exist (artifacts/*.nupkg)` until `78e3527` changed
+the pattern to `artifacts\*.nupkg`. Dane reported the successful publish on 2026-10-16.
 
-No git tags exist, so published version 2.0.1 cannot be mapped to a commit.
+The only git tag is `v3.0.0`, on `78e3527`, the commit that published 3.0.0. No older
+version has a tag, so 2.0.1 and earlier cannot be mapped to a commit.
 
 History shows work landing through GitHub pull requests (`#1`, `#2`, `#3`). The
 `wrap-up` skill added on 2026-09-17 is the local-merge path and says so; it is not
@@ -148,9 +148,10 @@ only a push to `main` logs in and pushes. `ContinuousIntegrationBuild` now keys 
 Pipelines, because nuget.org supports Trusted Publishing only from GitHub Actions, and a
 key expires again within a year. Setup outside the repo, done by Dane: on 2026-10-16, a
 Trusted Publishing policy on nuget.org for `DaneVinson/JsonEnvelopes`, workflow file
-`ci.yml`, package `JsonEnvelopes`, and no environment. Also needed, not confirmed when this
-was written: a `NUGET_USER` repository secret with the nuget.org user name, and disabling
-the Azure DevOps pipeline so it does not run on the next push.
+`ci.yml`, package `JsonEnvelopes`, and no environment, and a `NUGET_USER` repository
+secret with the nuget.org user name. The first successful run on 2026-10-16 confirmed the
+setup. Not confirmed: that the Azure DevOps pipeline is disabled. If it is not disabled, it
+still runs on each push to `main` and fails on the expired key.
 
 **`status.md` was seeded deliberately, not bootstrapped (2026-09-17).** The
 alternative was letting the `wrap-up` skill create this file on its first run.
@@ -384,10 +385,9 @@ compares each result to the single-threaded output. 54 tests.
   code change.
 - Findings in Section 5 are advisory until Dane picks one up. Do not start fixing them
   opportunistically; the open ones are not blocking anything.
-- **3.0.0 is built but unpublished.** It reaches nuget.org only when Dane decides to
-  push. Do not push `main` to make CI green or to "finish" the release. The release,
-  including the first pipeline run on `main`, is Dane's to do. Do not list it as
-  outstanding work.
+- **3.0.0 is published.** The next release is a version bump, and the decision to
+  release is Dane's. Do not push `main` to make CI green. Do not bump the version to
+  make a change ship.
 
 ## 7. Toolchain decisions
 
@@ -402,7 +402,7 @@ compares each result to the single-threaded output. 54 tests.
 | Tests | **xunit** 2.9.3 on `net48` and `net10.0`, with `coverlet.collector` 10.0.1 referenced but unused; 54 tests per target |
 | Type resolution | **consumer-supplied allow-list** via `EnvelopeTypeRegistry`; no reflection, no `Type.GetType` |
 | Packaging | **`dotnet pack`** from `JsonEnvelopes/JsonEnvelopes.csproj`; `.snupkg` symbols with SourceLink; readme and XML docs in the package |
-| CI | **GitHub Actions**, `.github/workflows/ci.yml`, `windows-latest`, SDK 10.x; the `net48` tests use the runner's installed .NET Framework: restore, build, test and `dotnet pack` on pushes and pull requests to `main`; on a push to `main` only, `NuGet/login` (Trusted Publishing) and `dotnet nuget push --skip-duplicate` to nuget.org. Unverified until its first run on GitHub. Replaced Azure Pipelines on 2026-10-16 — see Section 3 |
+| CI | **GitHub Actions**, `.github/workflows/ci.yml`, `windows-latest`, SDK 10.x; the `net48` tests use the runner's installed .NET Framework: restore, build, test and `dotnet pack` on pushes and pull requests to `main`; on a push to `main` only, `NuGet/login` (Trusted Publishing) and `dotnet nuget push --skip-duplicate` to nuget.org. Verified on 2026-10-16, when it published 3.0.0. Replaced Azure Pipelines on 2026-10-16 — see Section 3 |
 | Signing | strong-named via `<SignAssembly>` and `<AssemblyOriginatorKeyFile>` in `JsonEnvelopes/JsonEnvelopes.csproj`; key committed on purpose; see finding 13 |
 | Line endings | **CRLF** throughout the repo |
 
@@ -460,3 +460,17 @@ Added 2026-09-25:
   'System.Runtime.CompilerServices.IsExternalInit' is not defined` in `TestModels.cs`
   when the tests gained `net48`. Check: `JsonEnvelopes.Tests/IsExternalInit.cs` defines
   it under `#if NETFRAMEWORK`; a new .NET Framework project needs the same file.
+
+Added 2026-10-16:
+
+- **A forward slash before a wildcard in `dotnet nuget push` on Windows.** Symptom:
+  `error: File does not exist (artifacts/*.nupkg)`, although `dotnet pack` created the
+  package there. NuGet does not expand the wildcard after a `/` on Windows. Check: use
+  `artifacts\*.nupkg`; to test, push to a local folder with `--source <folder>`.
+- **A missing GitHub Actions secret.** Symptom: `NuGet/login` stops with
+  `Input required and not supplied: user`. GitHub gives an empty string for a secret that
+  does not exist, and gives no other error. Check: confirm the secret name under
+  Settings → Secrets and variables → Actions before the first run.
+- **`sed -i` in Git Bash on a CRLF file.** Symptom: every line of the file changes to LF,
+  and a pattern that ends in `\r$` does not match. Check: edit with the Edit tool, then
+  run the CRLF check above.
