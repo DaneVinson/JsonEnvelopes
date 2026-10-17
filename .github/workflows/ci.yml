@@ -44,6 +44,7 @@ jobs:
         user: ${{ secrets.NUGET_USER }}
 
     # Also pushes the matching .snupkg; --skip-duplicate keeps an unchanged version from failing the workflow
+    # The backslash is required: on Windows, NuGet does not expand "artifacts/*.nupkg" and reports "File does not exist"
     - name: dotnet nuget push -> nuget.org
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      run: dotnet nuget push "artifacts/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --skip-duplicate
+      run: dotnet nuget push "artifacts\*.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --skip-duplicate
