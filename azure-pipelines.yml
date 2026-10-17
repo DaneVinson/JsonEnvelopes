@@ -28,7 +28,7 @@ jobs:
       displayName: Build
       inputs:
         command: build
-        projects: 'JsonEnvelopes.sln'
+        projects: 'JsonEnvelopes.slnx'
         arguments: --configuration $(buildConfiguration)
 
     - task: DotNetCoreCLI@2
