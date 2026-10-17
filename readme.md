@@ -1,4 +1,4 @@
-# Json Envelopes
+# JsonEnvelopes
 Standardized messaging with System.Text.Json serialization.
 
 ## Purpose

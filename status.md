@@ -1,6 +1,6 @@
 # JsonEnvelopes — Project Status
 
-**Last updated:** 2026-09-26
+**Last updated:** 2026-10-16
 **Phase:** 3.0.0 is built, tested and merged to local `main`, but **not published**.
 It targets `netstandard2.0` and `net10.0`. Version 2.0.1 remains the latest on nuget.org.
 
@@ -26,7 +26,7 @@ changed our minds* — the things neither of the other two carries.
 
 ## 2. Repo state
 
-Three projects in `JsonEnvelopes.sln`:
+Three projects in `JsonEnvelopes.slnx`:
 
 - **`JsonEnvelopes/`** — the shipped library. `Envelope` (abstract base, carries the
   `[JsonConverter]` attribute), `Envelope<TContent>`, `EnvelopeJsonConverter`,
@@ -127,6 +127,13 @@ Accepted consequence: on .NET 6 and 7, `System.Text.Json` 10 and its transitive
 packages emit an unsupported-framework build warning. Verified with scratch consumers:
 `net472` and `net8.0` build clean, `net6.0` warns. The example stays on MediatR 10.0.1,
 because MediatR 13 and later need a commercial license key.
+
+**The solution file is `JsonEnvelopes.slnx` (2026-10-16).** `dotnet sln migrate`
+converted `JsonEnvelopes.sln` to the XML `.slnx` format, keeping the three projects and
+the `_Solution` items, and the `.sln` was deleted. Deliberately **rejected**: keeping both
+files, because with two solution files in the root a bare `dotnet build` stops and asks
+which one to use. `azure-pipelines.yml` and the `wrap-up` skill build `JsonEnvelopes.slnx`.
+The format needs SDK 9.0.200 or later; the pipeline installs 10.x.
 
 **`status.md` was seeded deliberately, not bootstrapped (2026-09-17).** The
 alternative was letting the `wrap-up` skill create this file on its first run.
@@ -370,7 +377,8 @@ compares each result to the single-threaded output. 54 tests.
 | Serializer dependency | **`System.Text.Json` 10.0.0** on `netstandard2.0` only; `net10.0` uses the in-box serializer — see Section 3 |
 | Language version | **C# 10**, pinned in `Directory.Build.props` as `<LangVersion>10.0</LangVersion>` |
 | Nullable / ImplicitUsings | **enabled** in `Directory.Build.props`, never per-project |
-| Local SDK | 10.0.401 is the only SDK installed; no .NET 8 runtime, so a `net8.0` consumer builds but does not run locally |
+| Solution file | **`JsonEnvelopes.slnx`**, the XML format; the `.sln` was removed 2026-10-16 — see Section 3 |
+| Local SDK | 10.0.402 is the only SDK installed; no .NET 8 runtime, so a `net8.0` consumer builds but does not run locally |
 | Tests | **xunit** 2.9.3 on `net48` and `net10.0`, with `coverlet.collector` 10.0.1 referenced but unused; 54 tests per target |
 | Type resolution | **consumer-supplied allow-list** via `EnvelopeTypeRegistry`; no reflection, no `Type.GetType` |
 | Packaging | **`dotnet pack`** from `JsonEnvelopes/JsonEnvelopes.csproj`; `.snupkg` symbols with SourceLink; readme and XML docs in the package |
@@ -425,9 +433,9 @@ Added 2026-09-25:
   unmerged. `git merge` does not read a message from stdin the way `git commit` does.
   Check: give merge messages with `-m`, one per paragraph, and read the merge result
   before deleting the branch. Step 7 of the `wrap-up` skill now says so.
-- **Deleting a file that `JsonEnvelopes.sln` lists as a solution item.** Symptom: none
+- **Deleting a file that `JsonEnvelopes.slnx` lists as a solution item.** Symptom: none
   at build time; the `_Solution` folder keeps a dangling entry. Check: after deleting a
-  root-level file, run `grep -n "<file name>" JsonEnvelopes.sln`.
+  root-level file, run `grep -n "<file name>" JsonEnvelopes.slnx`.
 - **Positional records on a .NET Framework target.** Symptom: `CS0518: Predefined type
   'System.Runtime.CompilerServices.IsExternalInit' is not defined` in `TestModels.cs`
   when the tests gained `net48`. Check: `JsonEnvelopes.Tests/IsExternalInit.cs` defines
